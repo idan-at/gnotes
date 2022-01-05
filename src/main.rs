@@ -1,9 +1,12 @@
+use anyhow::Result;
 use clap::{Parser, Subcommand};
-use gnotes::config::load_config;
+use gnotes::commands::{AppendCommand, NewCommand};
+use gnotes::config::{load_config, Config};
 use log::{debug, LevelFilter};
 use std::fs;
-use gnotes::commands::NewCommand;
-use anyhow::Result;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 
 const DEFAULT_NOTE_DIR: &'static str = "notes";
 
@@ -18,12 +21,41 @@ struct Cli {
 #[derive(Debug, Subcommand)]
 enum Command {
     New(NewCommand),
+    Append(AppendCommand),
 }
 
 fn init_logger(debug: bool) {
-    let level = if debug { LevelFilter::Debug } else { LevelFilter::Info };
+    let level = if debug {
+        LevelFilter::Debug
+    } else {
+        LevelFilter::Info
+    };
 
     env_logger::builder().filter_level(level).init()
+}
+
+fn create_note(config: &Config, name: &str, dir: Option<String>) -> Result<PathBuf> {
+    let note_dir_name = dir.unwrap_or(String::from(DEFAULT_NOTE_DIR));
+    let note_parent_dir = config.notes_dir.join(note_dir_name);
+    let note_file_path = note_parent_dir.join(name);
+
+    fs::create_dir_all(note_parent_dir)?;
+
+    Ok(note_file_path)
+}
+
+fn write_note(note_file_path: &Path, content: &str) -> Result<()> {
+    debug!("Writing message '{}' to {:?}", content, note_file_path);
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(note_file_path)
+        .unwrap();
+
+    writeln!(file, "{}", content)?;
+
+    Ok(())
 }
 
 // TODO: use https://docs.rs/termimad/latest/termimad/ for show.
@@ -44,26 +76,24 @@ fn main() -> Result<()> {
             Command::New(new_command) => {
                 debug!("new command {:?}", new_command);
 
-                // TODO: can be shared
-                let note_dir_name = new_command.dir.unwrap_or(String::from(DEFAULT_NOTE_DIR));
-                let note_parent_dir = config.notes_dir.join(note_dir_name);
-                let note_file_path = note_parent_dir.join(new_command.name);
-
-                fs::create_dir_all(note_parent_dir)?;
-                // end of TODO can be shared
+                let note_file_path = create_note(&config, &new_command.name, new_command.dir)?;
 
                 match new_command.message {
-                    Some(message) => {
-                        debug!("Writing message '{}' to {:?}", message, note_file_path);
-
-                        fs::write(note_file_path, message)?;
-                    },
+                    Some(message) => write_note(&note_file_path, &message)?,
                     _ => {
                         debug!("Opening editor for file {:?}", note_file_path);
 
                         edit::edit_file(note_file_path)?;
                     }
                 }
+            }
+            Command::Append(append_command) => {
+                debug!("append command {:?}", append_command);
+
+                let note_file_path =
+                    create_note(&config, &append_command.name, append_command.dir)?;
+
+                write_note(&note_file_path, &append_command.message)?;
             }
         }
     }
