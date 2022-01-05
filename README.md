@@ -14,13 +14,13 @@ gnotes supports the following commands:
 
 NOTE: For all commands, the default directory is "notes".
 
-- `gnotes new <name> [--dir <dir>]`: Creates a new note file under the specified directory.
+- `gnotes new <name> [--dir <dir>] [-m message]`: Creates a new note file under the specified directory. If `-m` is passed, the message will be written to the file. Otherwise, the note will be open with your configured terminal editor.
 - `gnotes remove <name> [--dir <dir>]`: Removes a note file.
 - `gnotes rm <name> [--dir <dir>]`: Alias for `gnotes remove`.
 - `gnotes list [--dir <dir>]`: Lists all the notes in the specified directory.
 - `gnotes ls [--dir <dir>]`: Alias for `gnotes list`.
 - `gnotes show name [--dir <dir>]`: Shows the note content in Markdown format.
-- `gnotes open <name> [--dir <dir>]`: Opens the notes files with your $EDITOR. If the note doesn't exist, it will be created.
+- `gnotes open <name> [--dir <dir>]`: Opens the notes files with your terminal editor. If the note doesn't exist, it will be created.
 - `gnotes save [--repository <repository>]`: Save the notes to the specific git repository.
 - `gnotes search [--dir <dir>] tag`: Searches the notes files with the specified tag.
 - `gnotes tag <name> [--dir <dir>] tags`: Adds tags for a specific note.

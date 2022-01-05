@@ -41,9 +41,9 @@ impl ExternalConfig {
 
 #[derive(Debug)]
 pub struct Config {
-    notes_dir: PathBuf,
-    auto_save: bool,
-    repository: Option<String>,
+    pub notes_dir: PathBuf,
+    pub auto_save: bool,
+    pub repository: Option<String>,
 }
 
 fn load_config_from_env() -> ExternalConfig {
