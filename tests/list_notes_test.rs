@@ -8,13 +8,13 @@ use std::fs;
 #[test]
 fn test_list_notes() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.dir.path().join("notes").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
-    let expected_line_regex = format!(".+ 6 .+{}", expected_note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
 
     cmd.args(vec!["list"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -27,13 +27,13 @@ fn test_list_notes() {
 #[test]
 fn test_list_notes_alias() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.dir.path().join("notes").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
-    let expected_line_regex = format!(".+ 6 .+{}", expected_note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
 
     cmd.args(vec!["ls"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -74,13 +74,13 @@ fn test_list_notes_ignore_non_directories() {
 #[test]
 fn test_list_notes_custom_dir() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("custom").join("chores");
+    let note_file_path = setup.dir.path().join("custom").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("custom")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
-    let expected_line_regex = format!(".+ 6 .+{}", expected_note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
 
     cmd.args(vec!["list", "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -93,14 +93,14 @@ fn test_list_notes_custom_dir() {
 #[test]
 fn test_list_notes_include_headers() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.dir.path().join("notes").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
     let expected_headers_line_regex = "Created\\s+Length\\s+Updated\\s+Path\n";
-    let expected_line_regex = format!(".+ 6 .+{}", expected_note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
 
     cmd.args(vec!["list", "--include-headers"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -114,17 +114,17 @@ fn test_list_notes_include_headers() {
 #[test]
 fn test_list_notes_all() {
     let setup = Setup::new();
-    let expected_note1_file_path = setup.dir.path().join("notes").join("chores");
-    let expected_note2_file_path = setup.dir.path().join("reminders").join("doctor");
+    let note1_file_path = setup.dir.path().join("notes").join("chores");
+    let note2_file_path = setup.dir.path().join("reminders").join("doctor");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
     fs::create_dir_all(setup.dir.path().join("reminders")).unwrap();
-    fs::write(&expected_note1_file_path, "hello\n").unwrap();
-    fs::write(&expected_note2_file_path, "goodbye\n").unwrap();
+    fs::write(&note1_file_path, "hello\n").unwrap();
+    fs::write(&note2_file_path, "goodbye\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
-    let expected_line1_regex = format!(".+ 6 .+{}", expected_note1_file_path.to_str().unwrap());
-    let expected_line2_regex = format!(".+ 8 .+{}", expected_note2_file_path.to_str().unwrap());
+    let expected_line1_regex = format!(".+ 6 .+{}", note1_file_path.to_str().unwrap());
+    let expected_line2_regex = format!(".+ 8 .+{}", note2_file_path.to_str().unwrap());
 
     cmd.args(vec!["list", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())

@@ -7,10 +7,10 @@ use std::fs;
 #[test]
 fn test_remove_note() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.dir.path().join("notes").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -19,16 +19,16 @@ fn test_remove_note() {
         .assert()
         .success();
 
-    assert!(!expected_note_file_path.exists());
+    assert!(!note_file_path.exists());
 }
 
 #[test]
 fn test_remove_note_alias() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.dir.path().join("notes").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -37,7 +37,7 @@ fn test_remove_note_alias() {
         .assert()
         .success();
 
-    assert!(!expected_note_file_path.exists());
+    assert!(!note_file_path.exists());
 }
 
 #[test]
@@ -55,10 +55,10 @@ fn test_remove_note_does_not_exist() {
 #[test]
 fn test_remove_note_custom_dir() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("custom").join("chores");
+    let note_file_path = setup.dir.path().join("custom").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("custom")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -67,5 +67,7 @@ fn test_remove_note_custom_dir() {
         .assert()
         .success();
 
-    assert!(!expected_note_file_path.exists());
+    assert!(!note_file_path.exists());
 }
+
+// TODO: Remove from tags when deleted.

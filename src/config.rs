@@ -162,7 +162,10 @@ mod tests {
 
         write_config_file(
             &home_dir,
-            format!("notes_dir = \"{}\"", notes_dir.to_str().unwrap()),
+            format!(
+                "notes_dir = \"{}\"",
+                String::from(notes_dir.to_string_lossy())
+            ),
         );
 
         let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
@@ -205,11 +208,15 @@ mod tests {
 
         write_config_file(&home_dir, String::from("notes_dir = \"whatever\""));
 
-        with_env_var("GNOTES_NOTES_DIR", notes_dir.to_str().unwrap(), || {
-            let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        with_env_var(
+            "GNOTES_NOTES_DIR",
+            notes_dir.to_string_lossy().as_ref(),
+            || {
+                let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
 
-            assert_eq!(config.notes_dir, notes_dir);
-        })
+                assert_eq!(config.notes_dir, notes_dir);
+            },
+        )
     }
 
     #[test]

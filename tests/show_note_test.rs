@@ -8,10 +8,10 @@ use std::fs;
 #[test]
 fn test_show_note() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.dir.path().join("notes").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -25,10 +25,10 @@ fn test_show_note() {
 #[test]
 fn test_show_note_custom_dir() {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("custom").join("chores");
+    let note_file_path = setup.dir.path().join("custom").join("chores");
 
     fs::create_dir_all(setup.dir.path().join("custom")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    fs::write(&note_file_path, "hello\n").unwrap();
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -43,7 +43,7 @@ fn test_show_note_custom_dir() {
 fn test_show_note_does_not_exist() {
     let setup = Setup::new();
 
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.dir.path().join("notes").join("chores");
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
     cmd.args(vec!["show", "chores"])
@@ -51,7 +51,7 @@ fn test_show_note_does_not_exist() {
         .assert()
         .stderr(format!(
             "show failed: file '{}' not found\n",
-            expected_note_file_path.to_str().unwrap()
+            note_file_path.to_str().unwrap()
         ))
         .code(1);
 }

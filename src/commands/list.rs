@@ -1,4 +1,4 @@
-use crate::common::{format_system_time, get_note_parent_dir};
+use crate::common::format_system_time;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -7,12 +7,13 @@ use log::debug;
 use std::fs;
 use std::fs::DirEntry;
 use std::path::Path;
+use std::path::PathBuf;
 use tabular::{Row, Table};
 
 #[derive(Debug, Parser)]
 pub struct ListCommand {
-    #[clap(long)]
-    pub dir: Option<String>,
+    #[clap(long, default_value = "notes")]
+    pub dir: PathBuf,
     #[clap(long)]
     pub include_headers: bool,
     #[clap(short, long)]
@@ -31,7 +32,7 @@ impl ListCommand {
 
             Ok(results)
         } else {
-            let note_parent_dir = get_note_parent_dir(config, &self.dir);
+            let note_parent_dir = config.notes_dir.join(&self.dir);
 
             self.list_entries_in(&note_parent_dir)
         }

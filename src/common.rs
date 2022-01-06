@@ -1,4 +1,3 @@
-use crate::config::Config;
 use anyhow::Result;
 use chrono::prelude::{DateTime, Utc};
 use chrono::Datelike;
@@ -7,10 +6,7 @@ use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
-use std::path::PathBuf;
 use std::time::SystemTime;
-
-const DEFAULT_NOTE_DIR: &'static str = "notes";
 
 pub fn format_system_time(system_time: SystemTime) -> String {
     let date_time: DateTime<Utc> = system_time.into();
@@ -24,12 +20,6 @@ pub fn format_system_time(system_time: SystemTime) -> String {
     } else {
         format!("{}", date_time.format("%b %e %H:%M"))
     }
-}
-
-pub fn get_note_parent_dir(config: &Config, dir: &Option<String>) -> PathBuf {
-    let note_dir_name = dir.clone().unwrap_or(String::from(DEFAULT_NOTE_DIR));
-
-    config.notes_dir.join(note_dir_name)
 }
 
 pub fn write_note(note_parent_dir: &Path, note_file_name: &str, content: &str) -> Result<()> {
@@ -53,37 +43,6 @@ pub fn write_note(note_parent_dir: &Path, note_file_name: &str, content: &str) -
 mod tests {
     use super::*;
     use chrono::Timelike;
-    use std::str::FromStr;
-
-    fn create_config(notes_dir: &Path) -> Config {
-        Config {
-            notes_dir: notes_dir.to_path_buf(),
-            auto_save: false,
-            repository: None,
-        }
-    }
-
-    #[test]
-    fn test_default_note_parent_dir() {
-        let notes_dir = PathBuf::from_str("/a/b/c").unwrap();
-        let config = create_config(&notes_dir);
-        let dir = None;
-
-        let note_parent_dir = get_note_parent_dir(&config, &dir);
-
-        assert_eq!(note_parent_dir, notes_dir.join("notes"));
-    }
-
-    #[test]
-    fn test_custom_note_parent_dir() {
-        let notes_dir = PathBuf::from_str("/a/b/c").unwrap();
-        let config = create_config(&notes_dir);
-        let dir = Some(String::from("custom"));
-
-        let note_parent_dir = get_note_parent_dir(&config, &dir);
-
-        assert_eq!(note_parent_dir, notes_dir.join("custom"));
-    }
 
     #[test]
     fn format_system_time_not_today() {
