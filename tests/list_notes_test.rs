@@ -95,3 +95,27 @@ fn test_list_notes_include_headers() {
         .stdout(predicate::str::is_match(expected_headers_line_regex).unwrap())
         .stdout(predicate::str::is_match(expected_line_regex).unwrap());
 }
+
+#[test]
+fn test_list_notes_all() {
+    let setup = Setup::new();
+    let expected_note1_file_path = setup.dir.path().join("notes").join("chores");
+    let expected_note2_file_path = setup.dir.path().join("reminders").join("doctor");
+
+    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
+    fs::create_dir_all(setup.dir.path().join("reminders")).unwrap();
+    fs::write(&expected_note1_file_path, "hello\n").unwrap();
+    fs::write(&expected_note2_file_path, "goodbye\n").unwrap();
+
+    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let expected_line1_regex = format!(".+ 6 .+{}", expected_note1_file_path.to_str().unwrap());
+    let expected_line2_regex = format!(".+ 8 .+{}", expected_note2_file_path.to_str().unwrap());
+
+    cmd.args(vec!["list", "--all"])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("total 2\n"))
+        .stdout(predicate::str::is_match(expected_line1_regex).unwrap())
+        .stdout(predicate::str::is_match(expected_line2_regex).unwrap());
+}
