@@ -74,3 +74,24 @@ fn test_list_notes_custom_dir() {
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::is_match(expected_line_regex).unwrap());
 }
+
+#[test]
+fn test_list_notes_include_headers() {
+    let setup = Setup::new();
+    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+
+    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
+    fs::write(&expected_note_file_path, "hello\n").unwrap();
+
+    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let expected_headers_line_regex = "Created\\s+Length\\s+Updated\\s+Path\n";
+    let expected_line_regex = format!(".+ 6 .+{}", expected_note_file_path.to_str().unwrap());
+
+    cmd.args(vec!["list", "--include-headers"])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("total 1\n"))
+        .stdout(predicate::str::is_match(expected_headers_line_regex).unwrap())
+        .stdout(predicate::str::is_match(expected_line_regex).unwrap());
+}

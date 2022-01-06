@@ -1,7 +1,6 @@
 mod setup;
 
 use assert_cmd::Command;
-use predicates::prelude::*;
 use setup::Setup;
 use std::fs;
 

@@ -6,8 +6,8 @@ use clap::Parser;
 use log::debug;
 use std::fs;
 use std::process;
+use termimad::{Area, MadSkin, MadView};
 
-// TODO: format better (smaller window size probably)
 #[derive(Debug, Parser)]
 pub struct ShowCommand {
     pub name: String,
@@ -25,7 +25,9 @@ impl Run for ShowCommand {
         if note_file_path.exists() {
             let content = fs::read_to_string(note_file_path)?;
 
-            termimad::print_text(&content);
+            let area = Area::new(0, 1, 80, 10);
+            let view = MadView::from(content, area, MadSkin::default());
+            view.write().unwrap();
         } else {
             eprintln!(
                 "show failed: file '{}' not found",

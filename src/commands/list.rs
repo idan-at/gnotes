@@ -8,11 +8,12 @@ use std::fs;
 use tabular::{Row, Table};
 
 // TODO: What about list all?
-// TODO: Add flag for adding the header of the table.
 #[derive(Debug, Parser)]
 pub struct ListCommand {
     #[clap(long)]
     pub dir: Option<String>,
+    #[clap(long)]
+    pub include_headers: bool
 }
 
 impl Run for ListCommand {
@@ -28,7 +29,12 @@ impl Run for ListCommand {
         };
         let total = result.len();
 
-        let mut table = Table::new("{:>} {:>} {:>} {:<}");
+        let mut table = Table::new("{:<} {:<} {:<} {:<}");
+
+        if self.include_headers {
+            table.add_row(Row::new().with_cell("Created").with_cell("Length").with_cell("Updated").with_cell("Path"));
+        }
+
         for entry_result in result {
             let entry = entry_result?;
             let metadata = entry.metadata()?;

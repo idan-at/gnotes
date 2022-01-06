@@ -18,7 +18,7 @@ fn test_show_note() {
     cmd.args(vec!["show", "chores"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
-        .stdout(predicate::eq("hello\n"))
+        .stdout(predicate::str::contains("hello"))
         .success();
 }
 
@@ -35,7 +35,7 @@ fn test_show_note_custom_dir() {
     cmd.args(vec!["show", "chores", "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
-        .stdout(predicate::eq("hello\n"))
+        .stdout(predicate::str::contains("hello"))
         .success();
 }
 
