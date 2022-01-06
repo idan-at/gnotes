@@ -17,14 +17,15 @@ NOTE: For all commands, the default directory is `"notes"`.
 - `gnotes new <name> [--dir <dir>] [-m message]`: Creates a new note file under the specified directory. If `-m` is passed, the message will be written to the file. Otherwise, the note will be open with your configured terminal editor.
 - `gnotes add <name> <message> [--dir <dir>]`: Appends the message to the given note. If the note doesn't already exist, it will be created.
 - `gnotes remove <name> [--dir <dir>]`: Removes a note file.
-- `gnotes rm <name> [--dir <dir>]`: Alias for `gnotes remove`.
-- `gnotes list [--dir <dir>]`: Lists all the notes in the specified directory.
-- `gnotes ls [--dir <dir>]`: Alias for `gnotes list`.
+- `gnotes rm`: Alias for `gnotes remove`.
+- `gnotes list [--dir <dir> --all --include-headers]`: Lists all the notes in the specified directory.
+- `gnotes ls`: Alias for `gnotes list`.
 - `gnotes show name [--dir <dir>]`: Shows the note content in Markdown format.
 - `gnotes edit <name> [--dir <dir>]`: Opens the notes files with your terminal editor. If the note doesn't exist, it will be created.
 - `gnotes save [--repository <repository>]`: Save the notes to the specific git repository.
 - `gnotes search [--dir <dir>] tag`: Searches the notes files with the specified tag.
-- `gnotes tag <name> [--dir <dir>] tags`: Adds tags for a specific note.
+- `gnotes tag <name> <tags> [--dir <dir>]`: Adds tags for a specific note.
+- `gnotes untag <name> tag [--dir <dir>]`: Removes a tag for a specific note.
 
 ## Config
 

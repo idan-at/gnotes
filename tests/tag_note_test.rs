@@ -12,6 +12,7 @@ fn read_to_json(path: &Path) -> Value {
     serde_json::from_str::<Value>(&content).unwrap()
 }
 
+// TODO: support untag
 #[test]
 fn test_tag_note() {
     let setup = Setup::new();
