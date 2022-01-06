@@ -49,7 +49,7 @@ fn test_add_to_existing_note() {
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
-    fs::create_dir_all(setup.dir.path().join("notes"));
+    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
     fs::write(&expected_note_file_path, "hello\n").unwrap();
 
     cmd.args(vec!["add", "chores", "do this and that"])

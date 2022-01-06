@@ -1,3 +1,4 @@
+use log::debug;
 use serde::Deserialize;
 use std::path::Path;
 use std::path::PathBuf;
@@ -69,7 +70,12 @@ pub fn load_config(home_dir: &Path) -> Result<Config, ConfigError> {
     let env_config = load_config_from_env();
     let file_config = load_config_from_file(&home_dir);
 
+    debug!("config loaded from env {:?}", env_config);
+    debug!("config loaded from file {:?}", file_config);
+
     let external_config = env_config.merge(file_config);
+
+    debug!("merged config {:?}", external_config);
 
     let config = Config {
         notes_dir: external_config
