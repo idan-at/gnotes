@@ -26,10 +26,7 @@ impl ListCommand {
 
             let mut results = vec![];
             for entry in entries {
-                let metadata = entry.metadata()?;
-                if metadata.is_dir() {
-                    results.extend(self.list_entries_in(&entry.path())?);
-                }
+                results.extend(self.list_entries_in(&entry.path())?);
             }
 
             Ok(results)
@@ -69,7 +66,7 @@ impl ListCommand {
     }
 
     fn list_entries_in(&self, dir: &Path) -> Result<Vec<DirEntry>> {
-        let results = if dir.exists() {
+        let results = if dir.exists() && dir.metadata()?.is_dir() {
             fs::read_dir(dir)?.filter_map(|entry| entry.ok()).collect()
         } else {
             vec![]
