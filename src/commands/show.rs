@@ -7,6 +7,7 @@ use log::debug;
 use std::fs;
 use std::process;
 
+// TODO: format better (smaller window size probably)
 #[derive(Debug, Parser)]
 pub struct ShowCommand {
     pub name: String,

@@ -1,6 +1,8 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use gnotes::commands::{AddCommand, ListCommand, NewCommand, RemoveCommand, ShowCommand};
+use gnotes::commands::{
+    AddCommand, EditCommand, ListCommand, NewCommand, RemoveCommand, ShowCommand,
+};
 use gnotes::config::load_config;
 use gnotes::run::Run;
 use log::{debug, LevelFilter};
@@ -22,6 +24,7 @@ enum Command {
     List(ListCommand),
     Ls(ListCommand),
     Show(ShowCommand),
+    Edit(EditCommand),
 }
 
 fn init_logger(debug: bool) {
@@ -55,6 +58,7 @@ fn main() -> Result<()> {
             }
             Command::List(list_command) | Command::Ls(list_command) => list_command.run(&config)?,
             Command::Show(show_command) => show_command.run(&config)?,
+            Command::Edit(edit_command) => edit_command.run(&config)?,
         }
     }
 
