@@ -14,6 +14,7 @@ envy = "0.4.0"
 log = "0.4.0"
 serde = { version = "1.0.0", features = ["derive"] }
 tabular = "0.1.0"
+termimad = "0.20.0"
 thiserror = "1.0.0"
 toml = "0.5.0"
 

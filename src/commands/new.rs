@@ -3,8 +3,8 @@ use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
 use clap::Parser;
-use std::fs;
 use log::debug;
+use std::fs;
 
 #[derive(Debug, Parser)]
 pub struct NewCommand {

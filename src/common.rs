@@ -1,6 +1,7 @@
 use crate::config::Config;
 use anyhow::Result;
 use chrono::prelude::{DateTime, Utc};
+use chrono::Datelike;
 use log::debug;
 use std::fs;
 use std::fs::OpenOptions;
@@ -8,7 +9,6 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::SystemTime;
-use chrono::Datelike;
 
 const DEFAULT_NOTE_DIR: &'static str = "notes";
 
@@ -16,7 +16,10 @@ pub fn format_system_time(system_time: SystemTime) -> String {
     let date_time: DateTime<Utc> = system_time.into();
     let now: DateTime<Utc> = SystemTime::now().into();
 
-    if date_time.year() == now.year() && date_time.month() == now.month() && date_time.day() == now.day() {
+    if date_time.year() == now.year()
+        && date_time.month() == now.month()
+        && date_time.day() == now.day()
+    {
         format!("{}", date_time.format("%H:%M"))
     } else {
         format!("{}", date_time.format("%b %e %H:%M"))
@@ -49,8 +52,8 @@ pub fn write_note(note_parent_dir: &Path, note_file_name: &str, content: &str) -
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::str::FromStr;
     use chrono::Timelike;
+    use std::str::FromStr;
 
     fn create_config(notes_dir: &Path) -> Config {
         Config {

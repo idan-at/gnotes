@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use gnotes::commands::{AddCommand, ListCommand, NewCommand, RemoveCommand};
+use gnotes::commands::{AddCommand, ListCommand, NewCommand, RemoveCommand, ShowCommand};
 use gnotes::config::load_config;
 use gnotes::run::Run;
 use log::{debug, LevelFilter};
@@ -21,6 +21,7 @@ enum Command {
     Rm(RemoveCommand),
     List(ListCommand),
     Ls(ListCommand),
+    Show(ShowCommand),
 }
 
 fn init_logger(debug: bool) {
@@ -33,7 +34,6 @@ fn init_logger(debug: bool) {
     env_logger::builder().filter_level(level).init()
 }
 
-// TODO: use https://docs.rs/termimad/latest/termimad/ for show.
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
@@ -54,6 +54,7 @@ fn main() -> Result<()> {
                 remove_command.run(&config)?
             }
             Command::List(list_command) | Command::Ls(list_command) => list_command.run(&config)?,
+            Command::Show(show_command) => show_command.run(&config)?,
         }
     }
 
