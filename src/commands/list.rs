@@ -22,13 +22,14 @@ pub struct ListCommand {
 impl ListCommand {
     fn list_notes(&self, config: &Config) -> Result<Vec<DirEntry>> {
         if self.all {
-            let dirs = self.list_entries_in(&config.notes_dir)?;
+            let entries = self.list_entries_in(&config.notes_dir)?;
 
             let mut results = vec![];
-            for dir in dirs {
-                let entries = self.list_entries_in(&dir.path())?;
-
-                results.extend(entries);
+            for entry in entries {
+                let metadata = entry.metadata()?;
+                if metadata.is_dir() {
+                    results.extend(self.list_entries_in(&entry.path())?);
+                }
             }
 
             Ok(results)
