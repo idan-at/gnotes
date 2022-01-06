@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use gnotes::commands::{AppendCommand, NewCommand};
+use gnotes::commands::{AddCommand, NewCommand};
 use gnotes::config::{load_config, Config};
 use log::{debug, LevelFilter};
 use std::fs;
@@ -21,7 +21,7 @@ struct Cli {
 #[derive(Debug, Subcommand)]
 enum Command {
     New(NewCommand),
-    Append(AppendCommand),
+    Add(AddCommand),
 }
 
 fn init_logger(debug: bool) {
@@ -87,13 +87,13 @@ fn main() -> Result<()> {
                     }
                 }
             }
-            Command::Append(append_command) => {
-                debug!("append command {:?}", append_command);
+            Command::Add(add_command) => {
+                debug!("add command {:?}", add_command);
 
                 let note_file_path =
-                    create_note(&config, &append_command.name, append_command.dir)?;
+                    create_note(&config, &add_command.name, add_command.dir)?;
 
-                write_note(&note_file_path, &append_command.message)?;
+                write_note(&note_file_path, &add_command.message)?;
             }
         }
     }

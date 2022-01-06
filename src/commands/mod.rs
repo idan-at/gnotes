@@ -1,5 +1,5 @@
-mod append;
+mod add;
 mod new;
 
-pub use append::AppendCommand;
+pub use add::AddCommand;
 pub use new::NewCommand;

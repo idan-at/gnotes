@@ -12,10 +12,10 @@ gnotes is a simple cli that allows you to easily add and edit notes without leav
 
 gnotes supports the following commands:
 
-NOTE: For all commands, the default directory is "notes".
+NOTE: For all commands, the default directory is `"notes"`.
 
 - `gnotes new <name> [--dir <dir>] [-m message]`: Creates a new note file under the specified directory. If `-m` is passed, the message will be written to the file. Otherwise, the note will be open with your configured terminal editor.
-- `gnotes append <name> <message> [--dir <dir>]`: Appends the message to the given note. If the note doesn't already exist, it will be created.
+- `gnotes add <name> <message> [--dir <dir>]`: Appends the message to the given note. If the note doesn't already exist, it will be created.
 - `gnotes remove <name> [--dir <dir>]`: Removes a note file.
 - `gnotes rm <name> [--dir <dir>]`: Alias for `gnotes remove`.
 - `gnotes list [--dir <dir>]`: Lists all the notes in the specified directory.
