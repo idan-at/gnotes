@@ -30,16 +30,10 @@ fn test_add_custom_dir() {
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
-    cmd.args(vec![
-        "add",
-        "chores",
-        "do this and that",
-        "--dir",
-        "custom",
-    ])
-    .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
-    .assert()
-    .success();
+    cmd.args(vec!["add", "chores", "do this and that", "--dir", "custom"])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .assert()
+        .success();
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
