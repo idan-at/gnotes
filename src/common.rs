@@ -60,6 +60,6 @@ mod tests {
 
         let formatted = format_system_time(system_time);
 
-        assert_eq!(formatted, format!("{}:{}", now.hour(), now.minute()))
+        assert_eq!(formatted, format!("{:02}:{:02}", now.hour(), now.minute()))
     }
 }

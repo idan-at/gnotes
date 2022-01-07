@@ -5,6 +5,8 @@ mod new;
 mod remove;
 mod show;
 mod tag;
+mod tags_common;
+mod untag;
 
 pub use self::edit::EditCommand;
 pub use add::AddCommand;
@@ -13,3 +15,4 @@ pub use new::NewCommand;
 pub use remove::RemoveCommand;
 pub use show::ShowCommand;
 pub use tag::TagCommand;
+pub use untag::UntagCommand;

@@ -1,8 +1,8 @@
-mod setup;
+mod common;
 
 use assert_cmd::Command;
+use common::Setup;
 use predicates::prelude::*;
-use setup::Setup;
 use std::fs;
 
 #[test]

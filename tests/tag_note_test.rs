@@ -1,18 +1,10 @@
-mod setup;
+mod common;
 
 use assert_cmd::Command;
-use serde_json::{json, Value};
-use setup::Setup;
+use common::{read_to_json, Setup};
+use serde_json::json;
 use std::fs;
-use std::path::Path;
 
-fn read_to_json(path: &Path) -> Value {
-    let content = fs::read_to_string(path).unwrap();
-
-    serde_json::from_str::<Value>(&content).unwrap()
-}
-
-// TODO: support untag
 #[test]
 fn test_tag_note() {
     let setup = Setup::new();
@@ -126,6 +118,7 @@ fn test_tag_note_tag_already_exists_for_different_note() {
     let expected = json!({"tag1":["notes/chores", "notes/reminders"],"tag2":["notes/chores"]});
 
     assert!(expected_tags_file_path.exists());
+    // TODO: Fix - flaky because of tag1 order.
     assert_eq!(read_to_json(&expected_tags_file_path), expected);
 }
 
