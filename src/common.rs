@@ -77,6 +77,16 @@ pub fn get_note_identifier(command: &str, notes_dir: &Path, name: &str, dir: &Pa
     String::from(note_relative_path.to_string_lossy())
 }
 
+pub fn write_as_markdown(notes_dir: &Path, note_identifier: &str) -> Result<()> {
+    let note_file_path = notes_dir.join(note_identifier);
+    let content = fs::read_to_string(note_file_path)?;
+
+    println!("{}:", note_identifier);
+    termimad::print_text(&content);
+
+    Ok(())
+}
+
 pub fn load_tags(notes_dir: &Path) -> Result<Tags> {
     let tags_file_path = notes_dir.join(TAGS_FILE_NAME);
 

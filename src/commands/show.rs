@@ -1,13 +1,11 @@
-use crate::common::resolve_dir;
+use crate::common::{resolve_dir, get_note_identifier, write_as_markdown};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
 use clap::Parser;
 use log::debug;
-use std::fs;
 use std::path::PathBuf;
 use std::process;
-use termimad::{Area, MadSkin, MadView};
 
 #[derive(Debug, Parser)]
 pub struct ShowCommand {
@@ -21,15 +19,11 @@ impl Run for ShowCommand {
         debug!("show command {:?}", self);
 
         let dir = resolve_dir(&self.dir);
-        let note_parent_dir = config.notes_dir.join(&dir);
-        let note_file_path = note_parent_dir.join(&self.name);
+        let note_file_path = config.notes_dir.join(&dir).join(&self.name);
+        let note_identifier = get_note_identifier("show", &config.notes_dir, &self.name, &dir);
 
         if note_file_path.exists() {
-            let content = fs::read_to_string(note_file_path)?;
-
-            let area = Area::new(0, 1, 80, 10);
-            let view = MadView::from(content, area, MadSkin::default());
-            view.write().unwrap();
+            write_as_markdown(&config.notes_dir, &note_identifier)?;
         } else {
             eprintln!(
                 "show failed: file '{}' not found",

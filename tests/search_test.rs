@@ -1,5 +1,6 @@
 mod setup;
 
+use gnotes::common::write_note;
 use anyhow::Result;
 use assert_cmd::Command;
 use gnotes::common::update_tags;
@@ -79,6 +80,27 @@ fn test_search_note_all() -> Result<()> {
         .stdout(predicate::str::contains("total 2\n"))
         .stdout(predicate::str::contains("notes/chores\n"))
         .stdout(predicate::str::contains("custom/reminders\n"))
+        .success();
+
+    Ok(())
+}
+
+#[test]
+fn test_search_note_show() -> Result<()> {
+    let setup = Setup::new();
+    let tags = json!({"tag":["notes/chores", "custom/reminders"]});
+
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
+    update_tags(setup.dir.path(), &tags)?;
+
+    let mut cmd = Command::cargo_bin("gnotes")?;
+
+    cmd.args(vec!["search", "tag", "--show"])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .assert()
+        .stdout(predicate::str::contains("total 1\n"))
+        .stdout(predicate::str::contains("notes/chores:\n"))
+        .stdout(predicate::str::contains("hello"))
         .success();
 
     Ok(())

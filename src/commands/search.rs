@@ -1,3 +1,4 @@
+use crate::common::write_as_markdown;
 use crate::common::{load_tags, resolve_dir};
 use crate::config::Config;
 use crate::run::Run;
@@ -7,7 +8,6 @@ use log::debug;
 use std::path::{PathBuf, MAIN_SEPARATOR};
 use std::process;
 
-// TODO: Add --show to actually show the content and not the names?
 #[derive(Debug, Parser)]
 pub struct SearchCommand {
     pub tag: String,
@@ -15,6 +15,8 @@ pub struct SearchCommand {
     pub dir: Option<PathBuf>,
     #[clap(long)]
     pub all: bool,
+    #[clap(long)]
+    pub show: bool,
 }
 
 impl Run for SearchCommand {
@@ -54,7 +56,11 @@ impl Run for SearchCommand {
         }
 
         for result in results {
-            println!("{}", result);
+            if self.show {
+                write_as_markdown(&config.notes_dir, result)?;
+            } else {
+                println!("{}", result);
+            }
         }
 
         Ok(())
