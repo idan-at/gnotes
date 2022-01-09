@@ -1,9 +1,9 @@
 mod setup;
 
-use gnotes::common::write_note;
 use anyhow::Result;
 use assert_cmd::Command;
 use gnotes::common::update_tags;
+use gnotes::common::write_note;
 use predicates::prelude::*;
 use serde_json::json;
 use setup::Setup;

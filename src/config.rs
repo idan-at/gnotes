@@ -18,6 +18,7 @@ struct ExternalConfig {
     notes_dir: Option<PathBuf>,
     auto_save: Option<bool>,
     repository: Option<String>,
+    ssh_file_path: Option<PathBuf>,
 }
 
 impl Default for ExternalConfig {
@@ -26,6 +27,7 @@ impl Default for ExternalConfig {
             notes_dir: None,
             auto_save: None,
             repository: None,
+            ssh_file_path: None,
         }
     }
 }
@@ -36,6 +38,7 @@ impl ExternalConfig {
             notes_dir: self.notes_dir.or(other.notes_dir),
             auto_save: self.auto_save.or(other.auto_save),
             repository: self.repository.or(other.repository),
+            ssh_file_path: self.ssh_file_path.or(other.ssh_file_path),
         }
     }
 }
@@ -45,6 +48,7 @@ pub struct Config {
     pub notes_dir: PathBuf,
     pub auto_save: bool,
     pub repository: Option<String>,
+    pub ssh_file_path: PathBuf,
 }
 
 fn load_config_from_env() -> ExternalConfig {
@@ -83,6 +87,7 @@ pub fn load_config(home_dir: &Path) -> Result<Config, ConfigError> {
             .unwrap_or(home_dir.join(GNOTES_DIR_NAME)),
         auto_save: external_config.auto_save.unwrap_or_default(),
         repository: external_config.repository,
+        ssh_file_path: external_config.ssh_file_path.unwrap_or(home_dir.join(".ssh").join("id_rsa"))
     };
 
     if config.auto_save && config.repository.is_none() {
@@ -156,6 +161,16 @@ mod tests {
 
     #[test]
     #[serial]
+    fn test_ssh_file_path_default() {
+        let home_dir = create_temp_dir();
+
+        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+
+        assert_eq!(config.ssh_file_path, home_dir.path().join(".ssh").join("id_rsa"));
+    }
+
+    #[test]
+    #[serial]
     fn test_notes_dir_from_config_file() {
         let home_dir = create_temp_dir();
         let notes_dir = home_dir.path().join("custom-notes-dir");
@@ -198,6 +213,25 @@ mod tests {
         let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
 
         assert_eq!(config.repository, Some(String::from("abc")));
+    }
+
+    #[test]
+    #[serial]
+    fn test_ssh_file_path_from_config_file() {
+        let home_dir = create_temp_dir();
+        let ssh_file_path = home_dir.path().join("custom-ssh-dir").join("some_id_rsa");
+
+        write_config_file(
+            &home_dir,
+            format!(
+                "ssh_file_path = \"{}\"",
+                String::from(ssh_file_path.to_string_lossy())
+            ),
+        );
+
+        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+
+        assert_eq!(config.ssh_file_path, ssh_file_path);
     }
 
     #[test]
@@ -248,6 +282,25 @@ mod tests {
 
             assert_eq!(config.repository, Some(String::from("abc")));
         })
+    }
+
+    #[test]
+    #[serial]
+    fn test_ssh_file_path_from_env() {
+        let home_dir = create_temp_dir();
+        let ssh_file_path = home_dir.path().join("custom-ssh-dir");
+
+        write_config_file(&home_dir, String::from("ssh_file_path = \"whatever\""));
+
+        with_env_var(
+            "GNOTES_SSH_FILE_PATH",
+            ssh_file_path.to_string_lossy().as_ref(),
+            || {
+                let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+
+                assert_eq!(config.ssh_file_path, ssh_file_path);
+            },
+        )
     }
 
     #[test]

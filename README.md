@@ -23,6 +23,7 @@ NOTE: For all commands, the default directory is `"notes"`.
 - `gnotes show <name> [--dir <dir>]`: Shows the note content in Markdown format.
 - `gnotes edit <name> [--dir <dir>]`: Opens the notes files with your terminal editor. If the note doesn't exist, it will be created.
 - `gnotes save [--repository <repository>]`: Save the notes to the specific git repository.
+- `gnotes clone`: Clones the notes repository to the notes home directory.
 - `gnotes search <tag> [--dir <dir> --all]`: Searches the notes files with the specified tag.
 - `gnotes tag <name> <tags> [--dir <dir>]`: Adds tags for a specific note.
 - `gnotes untag <name> <tag> [--dir <dir>]`: Removes a tag for a specific note.

@@ -1,4 +1,4 @@
-use crate::common::{resolve_dir, get_note_identifier, write_as_markdown};
+use crate::common::{get_note_identifier, resolve_dir, write_as_markdown};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;

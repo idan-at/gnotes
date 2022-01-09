@@ -1,4 +1,5 @@
 mod add;
+mod clone;
 mod edit;
 mod list;
 mod new;
@@ -10,6 +11,7 @@ mod untag;
 
 pub use self::edit::EditCommand;
 pub use add::AddCommand;
+pub use clone::CloneCommand;
 pub use list::ListCommand;
 pub use new::NewCommand;
 pub use remove::RemoveCommand;
