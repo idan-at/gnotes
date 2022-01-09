@@ -10,6 +10,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use tabular::{Row, Table};
 
+// TODO: --dir can't be used with --all
 #[derive(Debug, Parser)]
 pub struct ListCommand {
     #[clap(long, default_value = "notes")]
