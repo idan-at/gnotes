@@ -8,6 +8,7 @@ mod search;
 mod show;
 mod tag;
 mod untag;
+mod save;
 
 pub use self::edit::EditCommand;
 pub use add::AddCommand;
@@ -19,3 +20,4 @@ pub use search::SearchCommand;
 pub use show::ShowCommand;
 pub use tag::TagCommand;
 pub use untag::UntagCommand;
+pub use save::SaveCommand;

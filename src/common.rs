@@ -12,6 +12,8 @@ use std::path::PathBuf;
 use std::process;
 use std::time::SystemTime;
 
+// TODO: Split to multiple modules.
+
 const DEFAULT_NOTES_DIR: &'static str = "notes";
 const TAGS_FILE_NAME: &'static str = ".tags";
 

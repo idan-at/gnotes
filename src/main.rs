@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use gnotes::commands::{
     AddCommand, CloneCommand, EditCommand, ListCommand, NewCommand, RemoveCommand, SearchCommand,
-    ShowCommand, TagCommand, UntagCommand,
+    ShowCommand, TagCommand, UntagCommand, SaveCommand
 };
 use gnotes::config::load_config;
 use gnotes::run::Run;
@@ -30,6 +30,7 @@ enum Command {
     Untag(UntagCommand),
     Search(SearchCommand),
     Clone(CloneCommand),
+    Save(SaveCommand),
 }
 
 fn init_logger(debug: bool) {
@@ -68,6 +69,7 @@ fn main() -> Result<()> {
             Command::Untag(untag_command) => untag_command.run(&config)?,
             Command::Search(search_command) => search_command.run(&config)?,
             Command::Clone(clone_command) => clone_command.run(&config)?,
+            Command::Save(save_command) => save_command.run(&config)?,
         }
     }
 

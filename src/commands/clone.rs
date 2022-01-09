@@ -4,13 +4,11 @@ use anyhow::Result;
 use clap::Parser;
 use git2::{build::RepoBuilder, Cred, FetchOptions, RemoteCallbacks, Repository};
 use std::path::Path;
-use std::process;
 use log::debug;
+use std::process;
 
 #[derive(Debug, Parser)]
 pub struct CloneCommand {}
-
-const MISSING_REPOSITORY_ERROR_MESSAGE: &'static str = "Can't clone without a repository. Please specify a repository in the config file.";
 
 impl CloneCommand {
     fn clone(&self, repository: &str, ssh_file_path: &Path, to: &Path) -> Result<Repository> {
@@ -43,7 +41,7 @@ impl Run for CloneCommand {
                 self.clone(&repository, &config.ssh_file_path, &config.notes_dir)?;
             }
             _ => {
-                eprintln!("{}", MISSING_REPOSITORY_ERROR_MESSAGE);
+                eprintln!("Can't clone without a repository. Please specify a repository in the config file.");
 
                 process::exit(1);
             }
