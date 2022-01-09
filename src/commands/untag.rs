@@ -1,4 +1,5 @@
 use crate::commands::tags_common::{get_note_identifier, load_tags, update_tags};
+use crate::common::resolve_dir;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -10,15 +11,16 @@ use std::path::PathBuf;
 pub struct UntagCommand {
     pub name: String,
     pub tag: String,
-    #[clap(long, default_value = "notes")]
-    pub dir: PathBuf,
+    #[clap(long)]
+    pub dir: Option<PathBuf>,
 }
 
 impl Run for UntagCommand {
     fn run(&self, config: &Config) -> Result<()> {
         debug!("untag command {:?}", self);
 
-        let note_identifier = get_note_identifier("untag", config, &self.name, &self.dir);
+        let dir = resolve_dir(&self.dir);
+        let note_identifier = get_note_identifier("untag", config, &self.name, &dir);
 
         let mut tags = load_tags(config)?;
 

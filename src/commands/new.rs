@@ -1,4 +1,4 @@
-use crate::common::write_note;
+use crate::common::{resolve_dir, write_note};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -10,8 +10,8 @@ use std::path::PathBuf;
 #[derive(Debug, Parser)]
 pub struct NewCommand {
     pub name: String,
-    #[clap(long, default_value = "notes")]
-    pub dir: PathBuf,
+    #[clap(long)]
+    pub dir: Option<PathBuf>,
     #[clap(short, long)]
     pub message: Option<String>,
 }
@@ -20,7 +20,8 @@ impl Run for NewCommand {
     fn run(&self, config: &Config) -> Result<()> {
         debug!("new command {:?}", self);
 
-        let note_parent_dir = config.notes_dir.join(&self.dir);
+        let dir = resolve_dir(&self.dir);
+        let note_parent_dir = config.notes_dir.join(&dir);
 
         match &self.message {
             Some(message) => write_note(&note_parent_dir, &self.name, &message)?,

@@ -1,4 +1,5 @@
 use crate::commands::tags_common::{get_note_identifier, load_tags, update_tags, Tags};
+use crate::common::resolve_dir;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -11,19 +12,20 @@ use std::path::PathBuf;
 #[derive(Debug, Parser)]
 pub struct RemoveCommand {
     pub name: String,
-    #[clap(long, default_value = "notes")]
-    pub dir: PathBuf,
+    #[clap(long)]
+    pub dir: Option<PathBuf>,
 }
 
 impl Run for RemoveCommand {
     fn run(&self, config: &Config) -> Result<()> {
         debug!("remove command {:?}", self);
 
-        let note_parent_dir = config.notes_dir.join(&self.dir);
+        let dir = resolve_dir(&self.dir);
+        let note_parent_dir = config.notes_dir.join(&dir);
         let note_file_path = note_parent_dir.join(&self.name);
 
         if note_file_path.exists() {
-            let note_identifier = get_note_identifier("remove", config, &self.name, &self.dir);
+            let note_identifier = get_note_identifier("remove", config, &self.name, &dir);
 
             fs::remove_file(note_file_path)?;
 

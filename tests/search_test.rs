@@ -78,3 +78,16 @@ fn test_search_note_all() {
         .stdout(predicate::str::contains("custom/reminders\n"))
         .success();
 }
+
+#[test]
+fn test_search_note_custom_dir_with_all() {
+    let setup = Setup::new();
+
+    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+
+    cmd.args(vec!["search", "tag", "--dir", "custom", "--all"])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .assert()
+        .stderr(predicate::eq("--dir can't be used with --all\n"))
+        .code(1);
+}

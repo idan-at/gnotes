@@ -6,7 +6,10 @@ use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
+use std::path::PathBuf;
 use std::time::SystemTime;
+
+const DEFAULT_NOTES_DIR: &'static str = "notes";
 
 pub fn format_system_time(system_time: SystemTime) -> String {
     let date_time: DateTime<Utc> = system_time.into();
@@ -19,6 +22,13 @@ pub fn format_system_time(system_time: SystemTime) -> String {
         format!("{}", date_time.format("%H:%M"))
     } else {
         format!("{}", date_time.format("%b %e %H:%M"))
+    }
+}
+
+pub fn resolve_dir(dir: &Option<PathBuf>) -> PathBuf {
+    match dir {
+        Some(dir) => dir.clone(),
+        _ => PathBuf::from(DEFAULT_NOTES_DIR),
     }
 }
 
@@ -43,6 +53,24 @@ pub fn write_note(note_parent_dir: &Path, note_file_name: &str, content: &str) -
 mod tests {
     use super::*;
     use chrono::Timelike;
+
+    #[test]
+    fn resolve_dir_default() {
+        let expected = PathBuf::from("notes");
+
+        let dir = None;
+
+        assert_eq!(resolve_dir(&dir), expected);
+    }
+
+    #[test]
+    fn resolve_dir_custom() {
+        let expected = PathBuf::from("something");
+
+        let dir = Some(expected.clone());
+
+        assert_eq!(resolve_dir(&dir), expected);
+    }
 
     #[test]
     fn format_system_time_not_today() {

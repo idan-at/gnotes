@@ -149,3 +149,16 @@ fn test_list_notes_all_ignore_non_directories() {
         .success()
         .stdout(predicate::str::contains("total 0\n"));
 }
+
+#[test]
+fn test_list_notes_custom_dir_with_all() {
+    let setup = Setup::new();
+
+    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+
+    cmd.args(vec!["list", "--dir", "custom", "--all"])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .assert()
+        .code(1)
+        .stderr(predicate::eq("--dir can't be used with --all\n"));
+}

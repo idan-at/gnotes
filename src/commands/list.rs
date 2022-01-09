@@ -1,4 +1,4 @@
-use crate::common::format_system_time;
+use crate::common::{format_system_time, resolve_dir};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -8,13 +8,13 @@ use std::fs;
 use std::fs::DirEntry;
 use std::path::Path;
 use std::path::PathBuf;
+use std::process;
 use tabular::{Row, Table};
 
-// TODO: --dir can't be used with --all
 #[derive(Debug, Parser)]
 pub struct ListCommand {
-    #[clap(long, default_value = "notes")]
-    pub dir: PathBuf,
+    #[clap(long)]
+    pub dir: Option<PathBuf>,
     #[clap(long)]
     pub include_headers: bool,
     #[clap(short, long)]
@@ -33,7 +33,8 @@ impl ListCommand {
 
             Ok(results)
         } else {
-            let note_parent_dir = config.notes_dir.join(&self.dir);
+            let dir = resolve_dir(&self.dir);
+            let note_parent_dir = config.notes_dir.join(&dir);
 
             self.list_entries_in(&note_parent_dir)
         }
@@ -81,6 +82,12 @@ impl ListCommand {
 impl Run for ListCommand {
     fn run(&self, config: &Config) -> Result<()> {
         debug!("list command {:?}", self);
+
+        if self.dir.is_some() && self.all {
+            eprintln!("--dir can't be used with --all");
+
+            process::exit(1);
+        }
 
         let results = self.list_notes(config)?;
         let total = results.len();
