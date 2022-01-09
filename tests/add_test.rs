@@ -1,7 +1,7 @@
-mod common;
+mod setup;
 
 use assert_cmd::Command;
-use common::Setup;
+use setup::Setup;
 use std::fs;
 
 #[test]

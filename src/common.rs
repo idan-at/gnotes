@@ -1,15 +1,22 @@
+use crate::config::Config;
 use anyhow::Result;
 use chrono::prelude::{DateTime, Utc};
 use chrono::Datelike;
 use log::debug;
+use serde::Serialize;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::process;
 use std::time::SystemTime;
 
 const DEFAULT_NOTES_DIR: &'static str = "notes";
+const TAGS_FILE_NAME: &'static str = ".tags";
+
+pub type Tags = HashMap<String, HashSet<String>>;
 
 pub fn format_system_time(system_time: SystemTime) -> String {
     let date_time: DateTime<Utc> = system_time.into();
@@ -45,6 +52,51 @@ pub fn write_note(note_parent_dir: &Path, note_file_name: &str, content: &str) -
         .unwrap();
 
     writeln!(file, "{}", content)?;
+
+    Ok(())
+}
+
+// TODO: Drop config in favour of passing notes_dir
+fn assert_note_exists(command: &str, config: &Config, note_relative_path: &Path) {
+    let note_file_path = config.notes_dir.join(&note_relative_path);
+
+    if !note_file_path.exists() {
+        eprintln!(
+            "{} failed: file '{}' not found",
+            command,
+            String::from(note_file_path.to_string_lossy())
+        );
+
+        process::exit(1);
+    }
+}
+
+pub fn get_note_identifier(command: &str, config: &Config, name: &str, dir: &Path) -> String {
+    let note_relative_path = dir.join(name);
+
+    assert_note_exists(command, config, &note_relative_path);
+
+    String::from(note_relative_path.to_string_lossy())
+}
+
+pub fn load_tags(notes_dir: &Path) -> Result<Tags> {
+    let tags_file_path = notes_dir.join(TAGS_FILE_NAME);
+
+    let tags = if tags_file_path.exists() {
+        let data = fs::read_to_string(&tags_file_path)?;
+
+        serde_json::from_str::<Tags>(&data)?
+    } else {
+        HashMap::new()
+    };
+
+    Ok(tags)
+}
+
+pub fn update_tags<T: Serialize>(notes_dir: &Path, tags: &T) -> Result<()> {
+    let tags_file_path = notes_dir.join(TAGS_FILE_NAME);
+
+    fs::write(tags_file_path, serde_json::to_string(tags)?)?;
 
     Ok(())
 }

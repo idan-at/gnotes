@@ -1,8 +1,10 @@
-mod common;
+mod setup;
 
 use assert_cmd::Command;
-use common::{read_to_json, Setup};
+use gnotes::common::{load_tags, update_tags};
+use maplit::{hashmap, hashset};
 use serde_json::json;
+use setup::Setup;
 use std::fs;
 
 #[test]
@@ -75,14 +77,15 @@ fn test_remove_note_custom_dir() {
 fn test_remove_note_also_removes_tag() {
     let setup = Setup::new();
     let note_file_path = setup.dir.path().join("notes").join("chores");
-    let tags_file_path = setup.dir.path().join(".tags");
     let tags = json!({"tag1":["notes/chores", "notes/reminders"],"tag2":["notes/chores"]});
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
     fs::write(&note_file_path, "hello\n").unwrap();
-    fs::write(&tags_file_path, tags.to_string()).unwrap();
+    update_tags(setup.dir.path(), &tags).unwrap();
 
-    let expected_tags = json!({"tag1":["notes/reminders"]});
+    let expected_tags = hashmap! {
+        String::from("tag1") => hashset! { String::from("notes/reminders") }
+    };
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -92,5 +95,5 @@ fn test_remove_note_also_removes_tag() {
         .success();
 
     assert!(!note_file_path.exists());
-    assert_eq!(read_to_json(&tags_file_path), expected_tags);
+    assert_eq!(load_tags(setup.dir.path()).unwrap(), expected_tags);
 }

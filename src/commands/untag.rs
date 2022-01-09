@@ -1,5 +1,4 @@
-use crate::commands::tags_common::{get_note_identifier, load_tags, update_tags};
-use crate::common::resolve_dir;
+use crate::common::{get_note_identifier, load_tags, resolve_dir, update_tags};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -22,7 +21,7 @@ impl Run for UntagCommand {
         let dir = resolve_dir(&self.dir);
         let note_identifier = get_note_identifier("untag", config, &self.name, &dir);
 
-        let mut tags = load_tags(config)?;
+        let mut tags = load_tags(&config.notes_dir)?;
 
         match tags.get_mut(&self.tag) {
             Some(tags_set) => {
@@ -37,7 +36,7 @@ impl Run for UntagCommand {
             _ => {}
         }
 
-        update_tags(config, &tags)?;
+        update_tags(&config.notes_dir, &tags)?;
 
         Ok(())
     }

@@ -1,5 +1,4 @@
-use crate::commands::tags_common::{get_note_identifier, load_tags, update_tags, Tags};
-use crate::common::resolve_dir;
+use crate::common::{get_note_identifier, load_tags, resolve_dir, update_tags, Tags};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -29,7 +28,7 @@ impl Run for RemoveCommand {
 
             fs::remove_file(note_file_path)?;
 
-            let tags = load_tags(config)?;
+            let tags = load_tags(&config.notes_dir)?;
             let mut new_tags: Tags = HashMap::new();
 
             for (tag, tags_set) in tags {
@@ -46,7 +45,7 @@ impl Run for RemoveCommand {
                 }
             }
 
-            update_tags(config, &new_tags)?;
+            update_tags(&config.notes_dir, &new_tags)?;
         }
 
         Ok(())

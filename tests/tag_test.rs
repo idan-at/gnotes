@@ -1,15 +1,15 @@
-mod common;
+mod setup;
 
 use assert_cmd::Command;
-use common::{read_to_json, Setup};
-use serde_json::json;
+use gnotes::common::load_tags;
+use maplit::{hashmap, hashset};
+use setup::Setup;
 use std::fs;
 
 #[test]
 fn test_tag_note() {
     let setup = Setup::new();
     let note_file_path = setup.dir.path().join("notes").join("chores");
-    let expected_tags_file_path = setup.dir.path().join(".tags");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
     fs::write(&note_file_path, "hello\n").unwrap();
@@ -21,17 +21,18 @@ fn test_tag_note() {
         .assert()
         .success();
 
-    let expected = json!({"tag1":["notes/chores"],"tag2":["notes/chores"]});
+    let expected = hashmap! {
+      String::from("tag1") => hashset! { String::from("notes/chores") },
+      String::from("tag2") => hashset! { String::from("notes/chores") },
+    };
 
-    assert!(expected_tags_file_path.exists());
-    assert_eq!(read_to_json(&expected_tags_file_path), expected);
+    assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
 }
 
 #[test]
 fn test_tag_note_twice() {
     let setup = Setup::new();
     let note_file_path = setup.dir.path().join("notes").join("chores");
-    let expected_tags_file_path = setup.dir.path().join(".tags");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
     fs::write(&note_file_path, "hello\n").unwrap();
@@ -43,10 +44,11 @@ fn test_tag_note_twice() {
         .assert()
         .success();
 
-    let expected = json!({"tag":["notes/chores"]});
+    let expected = hashmap! {
+      String::from("tag") => hashset! { String::from("notes/chores") },
+    };
 
-    assert!(expected_tags_file_path.exists());
-    assert_eq!(read_to_json(&expected_tags_file_path), expected);
+    assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
 }
 
 #[test]
@@ -73,7 +75,6 @@ fn test_tag_note_does_not_exist() {
 fn test_tag_note_custom_dir() {
     let setup = Setup::new();
     let note_file_path = setup.dir.path().join("custom").join("chores");
-    let expected_tags_file_path = setup.dir.path().join(".tags");
 
     fs::create_dir_all(setup.dir.path().join("custom")).unwrap();
     fs::write(&note_file_path, "hello\n").unwrap();
@@ -85,10 +86,12 @@ fn test_tag_note_custom_dir() {
         .assert()
         .success();
 
-    let expected = json!({"tag1":["custom/chores"],"tag2":["custom/chores"]});
+    let expected = hashmap! {
+      String::from("tag1") => hashset! { String::from("custom/chores") },
+      String::from("tag2") => hashset! { String::from("custom/chores") },
+    };
 
-    assert!(expected_tags_file_path.exists());
-    assert_eq!(read_to_json(&expected_tags_file_path), expected);
+    assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
 }
 
 #[test]
@@ -96,7 +99,6 @@ fn test_tag_note_tag_already_exists_for_different_note() {
     let setup = Setup::new();
     let note1_file_path = setup.dir.path().join("notes").join("chores");
     let note2_file_path = setup.dir.path().join("notes").join("reminders");
-    let expected_tags_file_path = setup.dir.path().join(".tags");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
     fs::write(&note1_file_path, "hello\n").unwrap();
@@ -115,18 +117,18 @@ fn test_tag_note_tag_already_exists_for_different_note() {
         .assert()
         .success();
 
-    let expected = json!({"tag1":["notes/chores", "notes/reminders"],"tag2":["notes/chores"]});
+    let expected = hashmap! {
+      String::from("tag1") => hashset! { String::from("notes/chores"), String::from("notes/reminders") },
+      String::from("tag2") => hashset! { String::from("notes/chores") },
+    };
 
-    assert!(expected_tags_file_path.exists());
-    // TODO: Fix - flaky because of tag1 order.
-    assert_eq!(read_to_json(&expected_tags_file_path), expected);
+    assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
 }
 
 #[test]
 fn test_tag_note_tag_already_exists_for_this_note() {
     let setup = Setup::new();
     let note_file_path = setup.dir.path().join("notes").join("chores");
-    let expected_tags_file_path = setup.dir.path().join(".tags");
 
     fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
     fs::write(&note_file_path, "hello\n").unwrap();
@@ -144,8 +146,10 @@ fn test_tag_note_tag_already_exists_for_this_note() {
         .assert()
         .success();
 
-    let expected = json!({"tag1":["notes/chores"],"tag2":["notes/chores"]});
+    let expected = hashmap! {
+      String::from("tag1") => hashset! { String::from("notes/chores") },
+      String::from("tag2") => hashset! { String::from("notes/chores") },
+    };
 
-    assert!(expected_tags_file_path.exists());
-    assert_eq!(read_to_json(&expected_tags_file_path), expected);
+    assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
 }

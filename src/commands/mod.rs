@@ -6,7 +6,6 @@ mod remove;
 mod search;
 mod show;
 mod tag;
-mod tags_common;
 mod untag;
 
 pub use self::edit::EditCommand;

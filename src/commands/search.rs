@@ -1,5 +1,4 @@
-use crate::commands::tags_common::load_tags;
-use crate::common::resolve_dir;
+use crate::common::{load_tags, resolve_dir};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
@@ -29,7 +28,7 @@ impl Run for SearchCommand {
         }
 
         let dir = resolve_dir(&self.dir);
-        let tags = load_tags(config)?;
+        let tags = load_tags(&config.notes_dir)?;
 
         let results = match tags.get(&self.tag) {
             Some(tags_set) => {

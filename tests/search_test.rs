@@ -1,9 +1,9 @@
-mod common;
+mod setup;
 
 use assert_cmd::Command;
-use common::{read_to_json, Setup};
 use predicates::prelude::*;
 use serde_json::json;
+use setup::Setup;
 use std::fs;
 
 #[test]
