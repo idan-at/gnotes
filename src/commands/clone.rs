@@ -3,8 +3,8 @@ use crate::run::Run;
 use anyhow::Result;
 use clap::Parser;
 use git2::{build::RepoBuilder, Cred, FetchOptions, RemoteCallbacks, Repository};
-use std::path::Path;
 use log::debug;
+use std::path::Path;
 use std::process;
 
 #[derive(Debug, Parser)]
@@ -14,12 +14,7 @@ impl CloneCommand {
     fn clone(&self, repository: &str, ssh_file_path: &Path, to: &Path) -> Result<Repository> {
         let mut callbacks = RemoteCallbacks::new();
         callbacks.credentials(|_url, username_from_url, _allowed_types| {
-            Cred::ssh_key(
-                username_from_url.unwrap(),
-                None,
-                ssh_file_path,
-                None,
-            )
+            Cred::ssh_key(username_from_url.unwrap(), None, ssh_file_path, None)
         });
 
         let mut fo = FetchOptions::new();

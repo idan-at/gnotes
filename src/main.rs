@@ -1,8 +1,8 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use gnotes::commands::{
-    AddCommand, CloneCommand, EditCommand, ListCommand, NewCommand, RemoveCommand, SearchCommand,
-    ShowCommand, TagCommand, UntagCommand, SaveCommand
+    AddCommand, CloneCommand, EditCommand, ListCommand, NewCommand, RemoveCommand, SaveCommand,
+    SearchCommand, ShowCommand, TagCommand, UntagCommand,
 };
 use gnotes::config::load_config;
 use gnotes::run::Run;

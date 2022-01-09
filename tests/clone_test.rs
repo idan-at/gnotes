@@ -8,7 +8,9 @@ fn test_clone_fails_without_repository() -> Result<()> {
 
     cmd.args(vec!["clone"])
         .assert()
-        .stderr(predicate::eq("Can't clone without a repository. Please specify a repository in the config file.\n"))
+        .stderr(predicate::eq(
+            "Can't clone without a repository. Please specify a repository in the config file.\n",
+        ))
         .code(1);
 
     Ok(())

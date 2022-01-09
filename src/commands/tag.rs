@@ -1,4 +1,5 @@
-use crate::common::{get_note_identifier, load_tags, resolve_dir, update_tags};
+use crate::common::notes::{get_note_identifier, resolve_dir};
+use crate::common::tags::{load_tags, update_tags};
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;

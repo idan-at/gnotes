@@ -2,7 +2,7 @@ mod setup;
 
 use anyhow::Result;
 use assert_cmd::Command;
-use gnotes::common::write_note;
+use gnotes::common::notes::write_note;
 use predicates::prelude::*;
 use setup::Setup;
 use std::fs;

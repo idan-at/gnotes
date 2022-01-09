@@ -1,4 +1,5 @@
-use crate::common::{format_system_time, resolve_dir};
+use crate::common::format::format_system_time;
+use crate::common::notes::resolve_dir;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;

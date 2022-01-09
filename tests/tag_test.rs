@@ -2,8 +2,8 @@ mod setup;
 
 use anyhow::Result;
 use assert_cmd::Command;
-use gnotes::common::load_tags;
-use gnotes::common::write_note;
+use gnotes::common::notes::write_note;
+use gnotes::common::tags::load_tags;
 use maplit::{hashmap, hashset};
 use setup::Setup;
 

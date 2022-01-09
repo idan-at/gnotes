@@ -87,7 +87,9 @@ pub fn load_config(home_dir: &Path) -> Result<Config, ConfigError> {
             .unwrap_or(home_dir.join(GNOTES_DIR_NAME)),
         auto_save: external_config.auto_save.unwrap_or_default(),
         repository: external_config.repository,
-        ssh_file_path: external_config.ssh_file_path.unwrap_or(home_dir.join(".ssh").join("id_rsa"))
+        ssh_file_path: external_config
+            .ssh_file_path
+            .unwrap_or(home_dir.join(".ssh").join("id_rsa")),
     };
 
     if config.auto_save && config.repository.is_none() {
@@ -166,7 +168,10 @@ mod tests {
 
         let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
 
-        assert_eq!(config.ssh_file_path, home_dir.path().join(".ssh").join("id_rsa"));
+        assert_eq!(
+            config.ssh_file_path,
+            home_dir.path().join(".ssh").join("id_rsa")
+        );
     }
 
     #[test]

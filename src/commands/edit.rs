@@ -1,4 +1,4 @@
-use crate::common::resolve_dir;
+use crate::common::notes::resolve_dir;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
