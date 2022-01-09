@@ -20,7 +20,7 @@ impl Run for TagCommand {
         debug!("tag command {:?}", self);
 
         let dir = resolve_dir(&self.dir);
-        let note_identifier = get_note_identifier("tag", config, &self.name, &dir);
+        let note_identifier = get_note_identifier("tag", &config.notes_dir, &self.name, &dir);
 
         let mut tags = load_tags(&config.notes_dir)?;
 

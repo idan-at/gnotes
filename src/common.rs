@@ -1,4 +1,3 @@
-use crate::config::Config;
 use anyhow::Result;
 use chrono::prelude::{DateTime, Utc};
 use chrono::Datelike;
@@ -56,9 +55,8 @@ pub fn write_note(note_parent_dir: &Path, note_file_name: &str, content: &str) -
     Ok(())
 }
 
-// TODO: Drop config in favour of passing notes_dir
-fn assert_note_exists(command: &str, config: &Config, note_relative_path: &Path) {
-    let note_file_path = config.notes_dir.join(&note_relative_path);
+fn assert_note_exists(command: &str, notes_dir: &Path, note_relative_path: &Path) {
+    let note_file_path = notes_dir.join(&note_relative_path);
 
     if !note_file_path.exists() {
         eprintln!(
@@ -71,10 +69,10 @@ fn assert_note_exists(command: &str, config: &Config, note_relative_path: &Path)
     }
 }
 
-pub fn get_note_identifier(command: &str, config: &Config, name: &str, dir: &Path) -> String {
+pub fn get_note_identifier(command: &str, notes_dir: &Path, name: &str, dir: &Path) -> String {
     let note_relative_path = dir.join(name);
 
-    assert_note_exists(command, config, &note_relative_path);
+    assert_note_exists(command, notes_dir, &note_relative_path);
 
     String::from(note_relative_path.to_string_lossy())
 }

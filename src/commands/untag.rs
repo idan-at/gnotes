@@ -19,7 +19,7 @@ impl Run for UntagCommand {
         debug!("untag command {:?}", self);
 
         let dir = resolve_dir(&self.dir);
-        let note_identifier = get_note_identifier("untag", config, &self.name, &dir);
+        let note_identifier = get_note_identifier("untag", &config.notes_dir, &self.name, &dir);
 
         let mut tags = load_tags(&config.notes_dir)?;
 
