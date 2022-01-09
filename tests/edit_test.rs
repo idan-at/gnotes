@@ -1,16 +1,17 @@
 mod setup;
 
+use anyhow::Result;
 use assert_cmd::Command;
+use gnotes::common::write_note;
 use setup::Setup;
 use std::fs;
 
 #[test]
-fn test_edit_note() {
+fn test_edit_note() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let expected_note_file_path = setup.default_note_path();
 
-    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
 
     let mut stdin = String::new();
 
@@ -18,7 +19,7 @@ fn test_edit_note() {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["edit", "chores"])
         .env("EDITOR", "vim")
@@ -28,18 +29,19 @@ fn test_edit_note() {
         .success();
 
     assert_eq!(
-        fs::read_to_string(&expected_note_file_path).unwrap(),
+        fs::read_to_string(&expected_note_file_path)?,
         String::from("")
     );
+
+    Ok(())
 }
 
 #[test]
-fn test_edit_note_custom_dir() {
+fn test_edit_note_custom_dir() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("custom").join("chores");
+    let expected_note_file_path = setup.note_path("custom");
 
-    fs::create_dir_all(setup.dir.path().join("custom")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    write_note(&setup.note_parent_dir("custom"), "chores", "hello")?;
 
     let mut stdin = String::new();
 
@@ -47,7 +49,7 @@ fn test_edit_note_custom_dir() {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["edit", "chores", "--dir", "custom"])
         .env("EDITOR", "vim")
@@ -57,17 +59,19 @@ fn test_edit_note_custom_dir() {
         .success();
 
     assert_eq!(
-        fs::read_to_string(&expected_note_file_path).unwrap(),
+        fs::read_to_string(&expected_note_file_path)?,
         String::from("")
     );
+
+    Ok(())
 }
 
 #[test]
-fn test_edit_none_existing_note() {
+fn test_edit_none_existing_note() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     let mut stdin = String::new();
 
@@ -85,7 +89,9 @@ fn test_edit_none_existing_note() {
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
-        fs::read_to_string(expected_note_file_path).unwrap(),
+        fs::read_to_string(expected_note_file_path)?,
         String::from("do this and that\n")
     );
+
+    Ok(())
 }

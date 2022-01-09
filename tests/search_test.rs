@@ -1,20 +1,20 @@
 mod setup;
 
+use anyhow::Result;
 use assert_cmd::Command;
+use gnotes::common::update_tags;
 use predicates::prelude::*;
 use serde_json::json;
 use setup::Setup;
-use std::fs;
 
 #[test]
-fn test_search_note() {
+fn test_search_note() -> Result<()> {
     let setup = Setup::new();
-    let tags_file_path = setup.dir.path().join(".tags");
     let tags = json!({"tag":["notes/chores", "notes/reminders"]});
 
-    fs::write(&tags_file_path, tags.to_string()).unwrap();
+    update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["search", "tag"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -23,34 +23,36 @@ fn test_search_note() {
         .stdout(predicate::str::contains("notes/chores\n"))
         .stdout(predicate::str::contains("notes/reminders\n"))
         .success();
+
+    Ok(())
 }
 
 #[test]
-fn test_search_note_no_matches() {
+fn test_search_note_no_matches() -> Result<()> {
     let setup = Setup::new();
-    let tags_file_path = setup.dir.path().join(".tags");
     let tags = json!({"tag":["notes/chores", "notes/reminders"]});
 
-    fs::write(&tags_file_path, tags.to_string()).unwrap();
+    update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["search", "tag2"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::eq(""))
         .success();
+
+    Ok(())
 }
 
 #[test]
-fn test_search_note_custom_dir() {
+fn test_search_note_custom_dir() -> Result<()> {
     let setup = Setup::new();
-    let tags_file_path = setup.dir.path().join(".tags");
     let tags = json!({"tag":["custom1/chores", "custom/reminders"]});
 
-    fs::write(&tags_file_path, tags.to_string()).unwrap();
+    update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["search", "tag", "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -58,17 +60,18 @@ fn test_search_note_custom_dir() {
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::contains("custom/reminders\n"))
         .success();
+
+    Ok(())
 }
 
 #[test]
-fn test_search_note_all() {
+fn test_search_note_all() -> Result<()> {
     let setup = Setup::new();
-    let tags_file_path = setup.dir.path().join(".tags");
     let tags = json!({"tag":["notes/chores", "custom/reminders"]});
 
-    fs::write(&tags_file_path, tags.to_string()).unwrap();
+    update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["search", "tag", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -77,17 +80,21 @@ fn test_search_note_all() {
         .stdout(predicate::str::contains("notes/chores\n"))
         .stdout(predicate::str::contains("custom/reminders\n"))
         .success();
+
+    Ok(())
 }
 
 #[test]
-fn test_search_note_custom_dir_with_all() {
+fn test_search_note_custom_dir_with_all() -> Result<()> {
     let setup = Setup::new();
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["search", "tag", "--dir", "custom", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stderr(predicate::eq("--dir can't be used with --all\n"))
         .code(1);
+
+    Ok(())
 }

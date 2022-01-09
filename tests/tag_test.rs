@@ -1,18 +1,17 @@
 mod setup;
 
+use anyhow::Result;
 use assert_cmd::Command;
 use gnotes::common::load_tags;
+use gnotes::common::write_note;
 use maplit::{hashmap, hashset};
 use setup::Setup;
-use std::fs;
 
 #[test]
-fn test_tag_note() {
+fn test_tag_note() -> Result<()> {
     let setup = Setup::new();
-    let note_file_path = setup.dir.path().join("notes").join("chores");
 
-    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&note_file_path, "hello\n").unwrap();
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -27,15 +26,15 @@ fn test_tag_note() {
     };
 
     assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
+
+    Ok(())
 }
 
 #[test]
-fn test_tag_note_twice() {
+fn test_tag_note_twice() -> Result<()> {
     let setup = Setup::new();
-    let note_file_path = setup.dir.path().join("notes").join("chores");
 
-    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&note_file_path, "hello\n").unwrap();
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -49,12 +48,14 @@ fn test_tag_note_twice() {
     };
 
     assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
+
+    Ok(())
 }
 
 #[test]
-fn test_tag_note_does_not_exist() {
+fn test_tag_note_does_not_exist() -> Result<()> {
     let setup = Setup::new();
-    let note_file_path = setup.dir.path().join("notes").join("chores");
+    let note_file_path = setup.default_note_path();
     let tags_file_path = setup.dir.path().join(".tags");
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
@@ -69,15 +70,15 @@ fn test_tag_note_does_not_exist() {
         .code(1);
 
     assert!(!tags_file_path.exists());
+
+    Ok(())
 }
 
 #[test]
-fn test_tag_note_custom_dir() {
+fn test_tag_note_custom_dir() -> Result<()> {
     let setup = Setup::new();
-    let note_file_path = setup.dir.path().join("custom").join("chores");
 
-    fs::create_dir_all(setup.dir.path().join("custom")).unwrap();
-    fs::write(&note_file_path, "hello\n").unwrap();
+    write_note(&setup.note_parent_dir("custom"), "chores", "hello")?;
 
     let mut cmd = Command::cargo_bin("gnotes").unwrap();
 
@@ -92,17 +93,16 @@ fn test_tag_note_custom_dir() {
     };
 
     assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
+
+    Ok(())
 }
 
 #[test]
-fn test_tag_note_tag_already_exists_for_different_note() {
+fn test_tag_note_tag_already_exists_for_different_note() -> Result<()> {
     let setup = Setup::new();
-    let note1_file_path = setup.dir.path().join("notes").join("chores");
-    let note2_file_path = setup.dir.path().join("notes").join("reminders");
 
-    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&note1_file_path, "hello\n").unwrap();
-    fs::write(&note2_file_path, "gooebye\n").unwrap();
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
+    write_note(&setup.default_note_parent_dir(), "reminders", "goodbye")?;
 
     let mut cmd1 = Command::cargo_bin("gnotes").unwrap();
     let mut cmd2 = Command::cargo_bin("gnotes").unwrap();
@@ -123,15 +123,15 @@ fn test_tag_note_tag_already_exists_for_different_note() {
     };
 
     assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
+
+    Ok(())
 }
 
 #[test]
-fn test_tag_note_tag_already_exists_for_this_note() {
+fn test_tag_note_tag_already_exists_for_this_note() -> Result<()> {
     let setup = Setup::new();
-    let note_file_path = setup.dir.path().join("notes").join("chores");
 
-    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&note_file_path, "hello\n").unwrap();
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
 
     let mut cmd1 = Command::cargo_bin("gnotes").unwrap();
     let mut cmd2 = Command::cargo_bin("gnotes").unwrap();
@@ -152,4 +152,6 @@ fn test_tag_note_tag_already_exists_for_this_note() {
     };
 
     assert_eq!(load_tags(setup.dir.path()).unwrap(), expected);
+
+    Ok(())
 }

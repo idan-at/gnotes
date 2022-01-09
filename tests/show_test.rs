@@ -1,50 +1,51 @@
 mod setup;
 
+use anyhow::Result;
 use assert_cmd::Command;
+use gnotes::common::write_note;
 use predicates::prelude::*;
 use setup::Setup;
-use std::fs;
 
 #[test]
-fn test_show_note() {
+fn test_show_note() -> Result<()> {
     let setup = Setup::new();
-    let note_file_path = setup.dir.path().join("notes").join("chores");
 
-    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&note_file_path, "hello\n").unwrap();
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["show", "chores"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::str::contains("hello"))
         .success();
+
+    Ok(())
 }
 
 #[test]
-fn test_show_note_custom_dir() {
+fn test_show_note_custom_dir() -> Result<()> {
     let setup = Setup::new();
-    let note_file_path = setup.dir.path().join("custom").join("chores");
 
-    fs::create_dir_all(setup.dir.path().join("custom")).unwrap();
-    fs::write(&note_file_path, "hello\n").unwrap();
+    write_note(&setup.note_parent_dir("custom"), "chores", "hello")?;
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["show", "chores", "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::str::contains("hello"))
         .success();
+
+    Ok(())
 }
 
 #[test]
-fn test_show_note_does_not_exist() {
+fn test_show_note_does_not_exist() -> Result<()> {
     let setup = Setup::new();
 
-    let note_file_path = setup.dir.path().join("notes").join("chores");
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let note_file_path = setup.default_note_path();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["show", "chores"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -54,4 +55,6 @@ fn test_show_note_does_not_exist() {
             note_file_path.to_str().unwrap()
         ))
         .code(1);
+
+    Ok(())
 }

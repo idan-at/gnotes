@@ -24,7 +24,8 @@ impl Run for RemoveCommand {
         let note_file_path = note_parent_dir.join(&self.name);
 
         if note_file_path.exists() {
-            let note_identifier = get_note_identifier("remove", &config.notes_dir, &self.name, &dir);
+            let note_identifier =
+                get_note_identifier("remove", &config.notes_dir, &self.name, &dir);
 
             fs::remove_file(note_file_path)?;
 

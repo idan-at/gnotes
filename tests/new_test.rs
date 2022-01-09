@@ -1,15 +1,16 @@
 mod setup;
 
+use anyhow::Result;
 use assert_cmd::Command;
 use setup::Setup;
 use std::fs;
 
 #[test]
-fn test_new_note_with_message() {
+fn test_new_note_with_message() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["new", "chores", "-m", "do this and that"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -18,17 +19,19 @@ fn test_new_note_with_message() {
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
-        fs::read_to_string(expected_note_file_path).unwrap(),
+        fs::read_to_string(expected_note_file_path)?,
         String::from("do this and that\n")
     );
+
+    Ok(())
 }
 
 #[test]
-fn test_new_note_custom_dir() {
+fn test_new_note_custom_dir() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("custom").join("chores");
+    let expected_note_file_path = setup.note_path("custom");
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec![
         "new",
@@ -44,17 +47,19 @@ fn test_new_note_custom_dir() {
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
-        fs::read_to_string(expected_note_file_path).unwrap(),
+        fs::read_to_string(expected_note_file_path)?,
         String::from("do this and that\n")
     );
+
+    Ok(())
 }
 
 #[test]
-fn test_new_note_interactive() {
+fn test_new_note_interactive() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     let mut stdin = String::new();
 
@@ -72,7 +77,9 @@ fn test_new_note_interactive() {
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
-        fs::read_to_string(expected_note_file_path).unwrap(),
+        fs::read_to_string(expected_note_file_path)?,
         String::from("do this and that\n")
     );
+
+    Ok(())
 }

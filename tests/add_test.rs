@@ -1,15 +1,17 @@
 mod setup;
 
+use anyhow::Result;
 use assert_cmd::Command;
+use gnotes::common::write_note;
 use setup::Setup;
 use std::fs;
 
 #[test]
-fn test_add_to_new_note() {
+fn test_add_to_new_note() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["add", "chores", "do this and that"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -18,17 +20,19 @@ fn test_add_to_new_note() {
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
-        fs::read_to_string(expected_note_file_path).unwrap(),
+        fs::read_to_string(expected_note_file_path)?,
         String::from("do this and that\n")
     );
+
+    Ok(())
 }
 
 #[test]
-fn test_add_custom_dir() {
+fn test_add_custom_dir() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("custom").join("chores");
+    let expected_note_file_path = setup.note_path("custom");
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
     cmd.args(vec!["add", "chores", "do this and that", "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -37,20 +41,21 @@ fn test_add_custom_dir() {
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
-        fs::read_to_string(expected_note_file_path).unwrap(),
+        fs::read_to_string(expected_note_file_path)?,
         String::from("do this and that\n")
     );
+
+    Ok(())
 }
 
 #[test]
-fn test_add_to_existing_note() {
+fn test_add_to_existing_note() -> Result<()> {
     let setup = Setup::new();
-    let expected_note_file_path = setup.dir.path().join("notes").join("chores");
+    let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes").unwrap();
+    let mut cmd = Command::cargo_bin("gnotes")?;
 
-    fs::create_dir_all(setup.dir.path().join("notes")).unwrap();
-    fs::write(&expected_note_file_path, "hello\n").unwrap();
+    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
 
     cmd.args(vec!["add", "chores", "do this and that"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
@@ -58,7 +63,9 @@ fn test_add_to_existing_note() {
         .success();
 
     assert_eq!(
-        fs::read_to_string(expected_note_file_path).unwrap(),
+        fs::read_to_string(expected_note_file_path)?,
         String::from("hello\ndo this and that\n")
     );
+
+    Ok(())
 }
