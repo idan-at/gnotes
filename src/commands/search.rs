@@ -1,4 +1,4 @@
-use crate::common::format::write_as_markdown;
+use crate::common::writers::write_as_markdown;
 use crate::common::notes::resolve_dir;
 use crate::common::tags::load_tags;
 use crate::config::Config;

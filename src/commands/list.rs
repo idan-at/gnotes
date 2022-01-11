@@ -1,8 +1,9 @@
-use crate::common::format::format_system_time;
 use crate::common::notes::resolve_dir;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
+use chrono::prelude::{DateTime, Utc};
+use chrono::Datelike;
 use clap::Parser;
 use log::debug;
 use std::fs;
@@ -10,7 +11,22 @@ use std::fs::DirEntry;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
+use std::time::SystemTime;
 use tabular::{Row, Table};
+
+fn format_system_time(system_time: SystemTime) -> String {
+    let date_time: DateTime<Utc> = system_time.into();
+    let now: DateTime<Utc> = SystemTime::now().into();
+
+    if date_time.year() == now.year()
+        && date_time.month() == now.month()
+        && date_time.day() == now.day()
+    {
+        format!("{}", date_time.format("%H:%M"))
+    } else {
+        format!("{}", date_time.format("%b %e %H:%M"))
+    }
+}
 
 #[derive(Debug, Parser)]
 pub struct ListCommand {
@@ -100,5 +116,30 @@ impl Run for ListCommand {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Timelike;
+
+    #[test]
+    fn format_system_time_not_today() {
+        let system_time = SystemTime::UNIX_EPOCH;
+
+        let formatted = format_system_time(system_time);
+
+        assert_eq!(formatted, String::from("Jan  1 00:00"))
+    }
+
+    #[test]
+    fn format_system_time_today() {
+        let system_time = SystemTime::now();
+        let now: DateTime<Utc> = SystemTime::now().into();
+
+        let formatted = format_system_time(system_time);
+
+        assert_eq!(formatted, format!("{:02}:{:02}", now.hour(), now.minute()))
     }
 }
