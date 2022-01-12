@@ -1,9 +1,9 @@
+use crate::common::git::commit_and_push;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
 use chrono::prelude::{DateTime, Utc};
 use clap::Parser;
-use git2::{Repository, Signature};
 use log::debug;
 use std::process;
 use std::time::SystemTime;
@@ -20,15 +20,6 @@ pub struct SaveCommand {
     message: Option<String>,
 }
 
-impl SaveCommand {
-    fn open_repository(&self, repository: &str) -> Result<Repository> {
-        match Repository::open(repository) {
-            Ok(repo) => Ok(repo),
-            Err(_) => Ok(Repository::init(repository)?),
-        }
-    }
-}
-
 impl Run for SaveCommand {
     fn run(&self, config: &Config) -> Result<()> {
         debug!("save command {:?}", self);
@@ -40,27 +31,7 @@ impl Run for SaveCommand {
 
         match &config.repository {
             Some(repository) => {
-                let local_repository = self.open_repository(repository)?;
-                // TODO: Handle errors (maybe use `.remotes` and take head?)
-                let mut remote = local_repository.find_remote("origin")?;
-
-                let mut index = local_repository.index()?;
-                index.add_path(&config.notes_dir)?;
-                index.write()?;
-                let tree_id = index.write_tree()?;
-
-                let signature = Signature::now("gnotes", "gnotes@gnotes.com")?;
-
-                local_repository.commit(
-                    Some("HEAD"),
-                    &signature,
-                    &signature,
-                    &message,
-                    &local_repository.find_tree(tree_id)?,
-                    &[],
-                )?;
-
-                remote.push::<&str>(&[], None)?;
+                commit_and_push(repository, &config.notes_dir, &message)?;
             }
             _ => {
                 eprintln!("Can't save without a repository. Please specify a repository in the config file.");

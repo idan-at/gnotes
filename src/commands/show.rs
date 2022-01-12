@@ -1,5 +1,5 @@
-use crate::common::writers::write_as_markdown;
 use crate::common::notes::{get_note_identifier, resolve_dir};
+use crate::common::writers::write_as_markdown;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
