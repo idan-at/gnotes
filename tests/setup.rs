@@ -1,25 +1,24 @@
 // See https://github.com/rust-lang/rust/issues/46379
 #![allow(dead_code)]
 
+use anyhow::Result;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempdir::TempDir;
-use anyhow::Result;
 
-pub const DEFAULT_NOTES_DIR_NAME : &'static str = "notes";
-pub const DEFAULT_NOTE_FILE_NAME : &'static str = "chores";
+pub const DEFAULT_NOTES_DIR_NAME: &'static str = "notes";
+pub const DEFAULT_NOTE_FILE_NAME: &'static str = "chores";
 
 pub struct Setup {
     pub dir: TempDir,
 }
 
 impl Setup {
-    pub fn new() -> Self {
-        Self {
-            dir: TempDir::new("gnotes_test")
-                .expect("new_note_test: Failed to create a temporary directory"),
-        }
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            dir: TempDir::new("gnotes_test")?,
+        })
     }
 
     pub fn dir_path(&self) -> &Path {
@@ -45,7 +44,7 @@ impl Setup {
 
 pub struct GitSetup {
     dir: TempDir,
-    pub repo_path: PathBuf
+    pub repo_path: PathBuf,
 }
 
 impl GitSetup {
@@ -55,7 +54,13 @@ impl GitSetup {
         let repo_path = dir.path().join("notes_repo");
 
         fs::create_dir_all(repo_path.join(DEFAULT_NOTES_DIR_NAME))?;
-        fs::write(repo_path.join(DEFAULT_NOTES_DIR_NAME).join(DEFAULT_NOTE_FILE_NAME), "file content\n").expect("Failed to write file content");
+        fs::write(
+            repo_path
+                .join(DEFAULT_NOTES_DIR_NAME)
+                .join(DEFAULT_NOTE_FILE_NAME),
+            "file content\n",
+        )
+        .expect("Failed to write file content");
 
         let repo_path = fs::canonicalize(&repo_path)?;
 
@@ -67,7 +72,10 @@ impl GitSetup {
     }
 
     fn run_git_command(repo_path: &Path, args: &[&str]) -> Result<()> {
-        let mut cmd = Command::new("git").args(args).current_dir(&repo_path).spawn()?;
+        let mut cmd = Command::new("git")
+            .args(args)
+            .current_dir(&repo_path)
+            .spawn()?;
 
         cmd.wait()?;
 

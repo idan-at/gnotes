@@ -1,5 +1,7 @@
 mod setup;
 
+use crate::setup::DEFAULT_NOTES_DIR_NAME;
+use crate::setup::DEFAULT_NOTE_FILE_NAME;
 use anyhow::Result;
 use assert_cmd::Command;
 use gnotes::common::notes::write_note;
@@ -9,10 +11,14 @@ use std::fs;
 
 #[test]
 fn test_list_notes() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
     let note_file_path = setup.default_note_path();
 
-    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
+    write_note(
+        &setup.default_note_parent_dir(),
+        DEFAULT_NOTE_FILE_NAME,
+        "hello",
+    )?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
     let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
@@ -29,10 +35,14 @@ fn test_list_notes() -> Result<()> {
 
 #[test]
 fn test_list_notes_alias() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
     let note_file_path = setup.default_note_path();
 
-    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
+    write_note(
+        &setup.default_note_parent_dir(),
+        DEFAULT_NOTE_FILE_NAME,
+        "hello",
+    )?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
     let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
@@ -49,7 +59,7 @@ fn test_list_notes_alias() -> Result<()> {
 
 #[test]
 fn test_list_notes_does_not_exist() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
 
@@ -64,9 +74,9 @@ fn test_list_notes_does_not_exist() -> Result<()> {
 
 #[test]
 fn test_list_notes_ignore_non_directories() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
 
-    fs::write(&setup.dir.path().join("notes"), "hello\n")?;
+    fs::write(&setup.dir.path().join(DEFAULT_NOTES_DIR_NAME), "hello\n")?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
 
@@ -81,10 +91,14 @@ fn test_list_notes_ignore_non_directories() -> Result<()> {
 
 #[test]
 fn test_list_notes_custom_dir() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
     let note_file_path = setup.note_path("custom");
 
-    write_note(&setup.note_parent_dir("custom"), "chores", "hello")?;
+    write_note(
+        &setup.note_parent_dir("custom"),
+        DEFAULT_NOTE_FILE_NAME,
+        "hello",
+    )?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
     let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
@@ -101,10 +115,14 @@ fn test_list_notes_custom_dir() -> Result<()> {
 
 #[test]
 fn test_list_notes_include_headers() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
     let note_file_path = setup.default_note_path();
 
-    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
+    write_note(
+        &setup.default_note_parent_dir(),
+        DEFAULT_NOTE_FILE_NAME,
+        "hello",
+    )?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
     let expected_headers_line_regex = "Created\\s+Length\\s+Updated\\s+Path\n";
@@ -123,11 +141,15 @@ fn test_list_notes_include_headers() -> Result<()> {
 
 #[test]
 fn test_list_notes_all() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
     let note1_file_path = setup.default_note_path();
     let note2_file_path = setup.dir.path().join("reminders").join("doctor");
 
-    write_note(&setup.default_note_parent_dir(), "chores", "hello")?;
+    write_note(
+        &setup.default_note_parent_dir(),
+        DEFAULT_NOTE_FILE_NAME,
+        "hello",
+    )?;
     write_note(&setup.dir.path().join("reminders"), "doctor", "goodbye")?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
@@ -147,9 +169,9 @@ fn test_list_notes_all() -> Result<()> {
 
 #[test]
 fn test_list_notes_all_ignore_non_directories() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
 
-    fs::write(&setup.dir.path().join("notes"), "hello\n")?;
+    fs::write(&setup.dir.path().join(DEFAULT_NOTES_DIR_NAME), "hello\n")?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
 
@@ -164,7 +186,7 @@ fn test_list_notes_all_ignore_non_directories() -> Result<()> {
 
 #[test]
 fn test_list_notes_custom_dir_with_all() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
 

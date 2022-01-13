@@ -3,7 +3,7 @@ mod setup;
 use anyhow::Result;
 use assert_cmd::Command;
 use predicates::prelude::*;
-use setup::{Setup, GitSetup};
+use setup::{GitSetup, Setup};
 
 #[test]
 fn test_clone_fails_without_repository() -> Result<()> {
@@ -21,7 +21,7 @@ fn test_clone_fails_without_repository() -> Result<()> {
 
 #[test]
 fn test_clone_succeeds() -> Result<()> {
-    let setup = Setup::new();
+    let setup = Setup::new()?;
     let git_setup = GitSetup::new()?;
 
     let mut cmd = Command::cargo_bin("gnotes")?;
