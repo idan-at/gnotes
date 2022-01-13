@@ -1,6 +1,9 @@
+mod setup;
+
 use anyhow::Result;
 use assert_cmd::Command;
 use predicates::prelude::*;
+use setup::{Setup, GitSetup};
 
 #[test]
 fn test_clone_fails_without_repository() -> Result<()> {
@@ -16,4 +19,21 @@ fn test_clone_fails_without_repository() -> Result<()> {
     Ok(())
 }
 
-// TODO: Test clone works.
+#[test]
+fn test_clone_succeeds() -> Result<()> {
+    let setup = Setup::new();
+    let git_setup = GitSetup::new()?;
+
+    let mut cmd = Command::cargo_bin("gnotes")?;
+
+    // TODO: Provide id_rsa explicitly (ATM this assumes ~/.ssh/id_rsa exists)
+    cmd.args(vec!["clone"])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_REPOSITORY", &git_setup.repo_path)
+        .assert()
+        .code(0);
+
+    assert!(setup.default_note_path().exists());
+
+    Ok(())
+}
