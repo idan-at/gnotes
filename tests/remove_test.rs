@@ -19,9 +19,8 @@ fn test_remove_note() -> Result<()> {
         "hello",
     )?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success();
@@ -42,9 +41,8 @@ fn test_remove_note_alias() -> Result<()> {
         "hello",
     )?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["rm", DEFAULT_NOTE_FILE_NAME])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["rm", DEFAULT_NOTE_FILE_NAME])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success();
@@ -58,9 +56,8 @@ fn test_remove_note_alias() -> Result<()> {
 fn test_remove_note_succeeds_when_note_does_not_exist() -> Result<()> {
     let setup = Setup::new()?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success();
@@ -79,9 +76,8 @@ fn test_remove_note_custom_dir() -> Result<()> {
         "hello",
     )?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["remove", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success();
@@ -108,9 +104,8 @@ fn test_remove_note_also_removes_tag() -> Result<()> {
         String::from("tag1") => hashset! { String::from("notes/reminders") }
     };
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success();

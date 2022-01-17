@@ -12,9 +12,8 @@ fn test_add_to_new_note() -> Result<()> {
     let setup = Setup::new()?;
     let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success();
@@ -33,18 +32,17 @@ fn test_add_custom_dir() -> Result<()> {
     let setup = Setup::new()?;
     let expected_note_file_path = setup.note_path("custom");
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec![
-        "add",
-        DEFAULT_NOTE_FILE_NAME,
-        "do this and that",
-        "--dir",
-        "custom",
-    ])
-    .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
-    .assert()
-    .success();
+    Command::cargo_bin("gnotes")?
+        .args(vec![
+            "add",
+            DEFAULT_NOTE_FILE_NAME,
+            "do this and that",
+            "--dir",
+            "custom",
+        ])
+        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .assert()
+        .success();
 
     assert!(expected_note_file_path.exists());
     assert_eq!(
@@ -60,15 +58,14 @@ fn test_add_to_existing_note() -> Result<()> {
     let setup = Setup::new()?;
     let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
     write_note(
         &setup.default_note_parent_dir(),
         DEFAULT_NOTE_FILE_NAME,
         "hello",
     )?;
 
-    cmd.args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success();

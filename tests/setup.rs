@@ -4,7 +4,7 @@
 use anyhow::Result;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use tempdir::TempDir;
 
 pub const DEFAULT_NOTES_DIR_NAME: &'static str = "notes";
@@ -64,7 +64,7 @@ impl GitSetup {
 
         let repo_path = fs::canonicalize(&repo_path)?;
 
-        GitSetup::run_git_command(&repo_path, &["init", "-b", "master"])?;
+        GitSetup::run_git_command(&repo_path, &["init", "--bare", "-b", "master"])?;
         GitSetup::run_git_command(&repo_path, &["add", "."])?;
         GitSetup::run_git_command(&repo_path, &["commit", "-m", "initial commit"])?;
 
@@ -72,12 +72,13 @@ impl GitSetup {
     }
 
     fn run_git_command(repo_path: &Path, args: &[&str]) -> Result<()> {
-        let mut cmd = Command::new("git")
+        Command::new("git")
             .args(args)
             .current_dir(&repo_path)
-            .spawn()?;
-
-        cmd.wait()?;
+            .stderr(Stdio::null())
+            .stdout(Stdio::null())
+            .spawn()?
+            .wait()?;
 
         Ok(())
     }

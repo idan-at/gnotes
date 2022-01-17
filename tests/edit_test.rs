@@ -24,9 +24,8 @@ fn test_edit_note() -> Result<()> {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
         .env("EDITOR", "vim")
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .write_stdin(stdin)
@@ -58,9 +57,8 @@ fn test_edit_note_custom_dir() -> Result<()> {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["edit", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["edit", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
         .env("EDITOR", "vim")
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .write_stdin(stdin)
@@ -80,8 +78,6 @@ fn test_edit_none_existing_note() -> Result<()> {
     let setup = Setup::new()?;
     let expected_note_file_path = setup.default_note_path();
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
     let mut stdin = String::new();
 
     stdin.push('i'); // enter vim edit mode
@@ -89,7 +85,8 @@ fn test_edit_none_existing_note() -> Result<()> {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    cmd.args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
         .env("EDITOR", "vim")
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .write_stdin(stdin)

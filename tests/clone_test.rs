@@ -7,9 +7,8 @@ use setup::{GitSetup, Setup};
 
 #[test]
 fn test_clone_fails_without_repository() -> Result<()> {
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["clone"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["clone"])
         .assert()
         .stderr(predicate::eq(
             "Can't clone without a repository. Please specify a repository in the config file.\n",
@@ -20,14 +19,14 @@ fn test_clone_fails_without_repository() -> Result<()> {
 }
 
 #[test]
+#[ignore]
 fn test_clone_succeeds() -> Result<()> {
     let setup = Setup::new()?;
     let git_setup = GitSetup::new()?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
     // TODO: Provide id_rsa explicitly (ATM this assumes ~/.ssh/id_rsa exists)
-    cmd.args(vec!["clone"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["clone"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .env("GNOTES_REPOSITORY", &git_setup.repo_path)
         .assert()

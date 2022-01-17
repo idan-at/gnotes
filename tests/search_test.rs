@@ -15,9 +15,8 @@ fn test_search_note() -> Result<()> {
 
     update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["search", "tag"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["search", "tag"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::str::contains("total 2\n"))
@@ -35,9 +34,8 @@ fn test_search_note_no_matches() -> Result<()> {
 
     update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["search", "tag2"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["search", "tag2"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::eq(""))
@@ -53,9 +51,8 @@ fn test_search_note_custom_dir() -> Result<()> {
 
     update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["search", "tag", "--dir", "custom"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["search", "tag", "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::str::contains("total 1\n"))
@@ -72,9 +69,8 @@ fn test_search_note_all() -> Result<()> {
 
     update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["search", "tag", "--all"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["search", "tag", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::str::contains("total 2\n"))
@@ -97,9 +93,8 @@ fn test_search_note_show() -> Result<()> {
     )?;
     update_tags(setup.dir.path(), &tags)?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["search", "tag", "--show"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["search", "tag", "--show"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stdout(predicate::str::contains("total 1\n"))
@@ -114,9 +109,8 @@ fn test_search_note_show() -> Result<()> {
 fn test_search_note_custom_dir_with_all() -> Result<()> {
     let setup = Setup::new()?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["search", "tag", "--dir", "custom", "--all"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["search", "tag", "--dir", "custom", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .stderr(predicate::eq("--dir can't be used with --all\n"))

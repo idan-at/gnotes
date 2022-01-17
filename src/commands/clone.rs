@@ -15,6 +15,7 @@ impl CloneCommand {
         let mut callbacks = RemoteCallbacks::new();
         // TODO: This part is not covered in the clone tests.
         callbacks.credentials(|_url, username_from_url, _allowed_types| {
+            // TODO: drop unwrap
             Cred::ssh_key(username_from_url.unwrap(), None, ssh_file_path, None)
         });
 

@@ -24,8 +24,7 @@ pub fn write_note(note_parent_dir: &Path, note_file_name: &str, content: &str) -
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(note_file_path)
-        .unwrap();
+        .open(note_file_path)?;
 
     writeln!(file, "{}", content)?;
 

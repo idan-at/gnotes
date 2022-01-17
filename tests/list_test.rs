@@ -2,7 +2,7 @@ mod setup;
 
 use crate::setup::DEFAULT_NOTES_DIR_NAME;
 use crate::setup::DEFAULT_NOTE_FILE_NAME;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use assert_cmd::Command;
 use gnotes::common::notes::write_note;
 use predicates::prelude::*;
@@ -20,10 +20,13 @@ fn test_list_notes() -> Result<()> {
         "hello",
     )?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(
+        ".+ 6 .+{}",
+        note_file_path.to_str().context("note_file_path.to_str()")?
+    );
 
-    cmd.args(vec!["list"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -44,10 +47,13 @@ fn test_list_notes_alias() -> Result<()> {
         "hello",
     )?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(
+        ".+ 6 .+{}",
+        note_file_path.to_str().context("note_file_path.to_str()")?
+    );
 
-    cmd.args(vec!["ls"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["ls"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -61,9 +67,8 @@ fn test_list_notes_alias() -> Result<()> {
 fn test_list_notes_does_not_exist() -> Result<()> {
     let setup = Setup::new()?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["list"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -78,9 +83,8 @@ fn test_list_notes_ignore_non_directories() -> Result<()> {
 
     fs::write(&setup.dir.path().join(DEFAULT_NOTES_DIR_NAME), "hello\n")?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["list"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -100,10 +104,13 @@ fn test_list_notes_custom_dir() -> Result<()> {
         "hello",
     )?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(
+        ".+ 6 .+{}",
+        note_file_path.to_str().context("note_file_path.to_str()")?
+    );
 
-    cmd.args(vec!["list", "--dir", "custom"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list", "--dir", "custom"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -124,11 +131,14 @@ fn test_list_notes_include_headers() -> Result<()> {
         "hello",
     )?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
     let expected_headers_line_regex = "Created\\s+Length\\s+Updated\\s+Path\n";
-    let expected_line_regex = format!(".+ 6 .+{}", note_file_path.to_str().unwrap());
+    let expected_line_regex = format!(
+        ".+ 6 .+{}",
+        note_file_path.to_str().context("note_file_path.to_str()")?
+    );
 
-    cmd.args(vec!["list", "--include-headers"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list", "--include-headers"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -152,11 +162,21 @@ fn test_list_notes_all() -> Result<()> {
     )?;
     write_note(&setup.dir.path().join("reminders"), "doctor", "goodbye")?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-    let expected_line1_regex = format!(".+ 6 .+{}", note1_file_path.to_str().unwrap());
-    let expected_line2_regex = format!(".+ 8 .+{}", note2_file_path.to_str().unwrap());
+    let expected_line1_regex = format!(
+        ".+ 6 .+{}",
+        note1_file_path
+            .to_str()
+            .context("note1_file_path.to_str()")?
+    );
+    let expected_line2_regex = format!(
+        ".+ 8 .+{}",
+        note2_file_path
+            .to_str()
+            .context("note2_file_path.to_str()")?
+    );
 
-    cmd.args(vec!["list", "--all"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -173,9 +193,8 @@ fn test_list_notes_all_ignore_non_directories() -> Result<()> {
 
     fs::write(&setup.dir.path().join(DEFAULT_NOTES_DIR_NAME), "hello\n")?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["list", "--all"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .success()
@@ -188,9 +207,8 @@ fn test_list_notes_all_ignore_non_directories() -> Result<()> {
 fn test_list_notes_custom_dir_with_all() -> Result<()> {
     let setup = Setup::new()?;
 
-    let mut cmd = Command::cargo_bin("gnotes")?;
-
-    cmd.args(vec!["list", "--dir", "custom", "--all"])
+    Command::cargo_bin("gnotes")?
+        .args(vec!["list", "--dir", "custom", "--all"])
         .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
         .assert()
         .code(1)

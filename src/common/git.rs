@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use git2::{Repository, Signature};
 use std::path::Path;
 
@@ -16,8 +16,7 @@ pub fn commit_and_push(repository: &str, path: &Path, message: &str) -> Result<(
     let local_repository = open_repository(repository)?;
 
     let remotes_list = local_repository.remotes()?;
-    // TODO: Replace expect with error (Option -> Result)
-    let remote_name = remotes_list.get(0).expect("Failed to find remote");
+    let remote_name = remotes_list.get(0).context("Failed to find remote")?;
     let mut remote = local_repository.find_remote(remote_name)?;
 
     let mut index = local_repository.index()?;
