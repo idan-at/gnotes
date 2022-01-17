@@ -1,6 +1,6 @@
 mod setup;
 
-use crate::setup::{GitSetup, Setup};
+use crate::setup::GitSetup;
 use anyhow::Result;
 use assert_cmd::Command;
 use predicates::prelude::*;
@@ -22,28 +22,22 @@ fn test_save_fails_without_repository() -> Result<()> {
 #[test]
 #[ignore]
 fn test_save_succeeds() -> Result<()> {
-    let setup = Setup::new()?;
     let git_setup = GitSetup::new()?;
 
-    // TODO: Provide id_rsa explicitly (ATM this assumes ~/.ssh/id_rsa exists)
-    Command::cargo_bin("gnotes")?
-        .args(vec!["clone"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
-        .env("GNOTES_REPOSITORY", &git_setup.repo_path)
-        .assert()
-        .code(0);
-
-    fs::write(&setup.default_note_path(), "updated file content\n")?;
+    fs::write(
+        GitSetup::build_note_path(git_setup.clone_dir.path()),
+        "updated file content\n",
+    )?;
 
     // TODO: Provide id_rsa explicitly (ATM this assumes ~/.ssh/id_rsa exists)
     Command::cargo_bin("gnotes")?
         .args(vec!["save"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
-        .env("GNOTES_REPOSITORY", &git_setup.repo_path)
+        .env("GNOTES_NOTES_DIR", git_setup.clone_dir.path())
+        .env("GNOTES_REPOSITORY", git_setup.bare_dir.path())
         .assert()
         .code(0);
 
-    let file_content = fs::read_to_string(&setup.default_note_path())?;
+    let file_content = fs::read_to_string(GitSetup::build_note_path(git_setup.bare_dir.path()))?;
 
     println!("**** {}", file_content);
 

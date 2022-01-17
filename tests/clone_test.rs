@@ -19,7 +19,6 @@ fn test_clone_fails_without_repository() -> Result<()> {
 }
 
 #[test]
-#[ignore]
 fn test_clone_succeeds() -> Result<()> {
     let setup = Setup::new()?;
     let git_setup = GitSetup::new()?;
@@ -27,8 +26,8 @@ fn test_clone_succeeds() -> Result<()> {
     // TODO: Provide id_rsa explicitly (ATM this assumes ~/.ssh/id_rsa exists)
     Command::cargo_bin("gnotes")?
         .args(vec!["clone"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
-        .env("GNOTES_REPOSITORY", &git_setup.repo_path)
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
+        .env("GNOTES_REPOSITORY", git_setup.bare_dir.path())
         .assert()
         .code(0);
 

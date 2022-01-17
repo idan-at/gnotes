@@ -104,80 +104,93 @@ pub fn load_config(home_dir: &Path) -> Result<Config, ConfigError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use anyhow::{Context, Result};
     use serial_test::serial;
     use std::env;
     use std::fs;
     use tempdir::TempDir;
 
-    fn create_temp_dir() -> TempDir {
-        TempDir::new("gnotes_config_test")
-            .expect("config tests: Failed to create a temporary directory")
+    fn create_temp_dir() -> Result<TempDir> {
+        Ok(TempDir::new("gnotes_config_test")
+            .context("config tests: Failed to create a temporary directory")?)
     }
 
-    fn write_config_file(home_dir: &TempDir, content: String) {
+    fn write_config_file(home_dir: &TempDir, content: String) -> Result<()> {
         let config_file = home_dir.path().join(".gnotes.toml");
 
-        fs::write(config_file, format!("{}", content)).expect("Failed to write config file");
+        fs::write(config_file, format!("{}", content)).context("Failed to write config file")?;
+
+        Ok(())
     }
 
-    fn with_env_var<F>(key: &str, value: &str, f: F)
+    fn with_env_var<F>(key: &str, value: &str, f: F) -> Result<()>
     where
-        F: Fn(),
+        F: Fn() -> Result<()>,
     {
         env::set_var(key, value);
 
-        f();
+        f()?;
 
         env::remove_var(key);
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_notes_dir_default() {
-        let home_dir = create_temp_dir();
+    fn test_notes_dir_default() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert_eq!(config.notes_dir, home_dir.path().join(".gnotes"));
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_auto_save_default() {
-        let home_dir = create_temp_dir();
+    fn test_auto_save_default() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert_eq!(config.auto_save, false);
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_repository_default() {
-        let home_dir = create_temp_dir();
+    fn test_repository_default() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert_eq!(config.repository, None);
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_ssh_file_path_default() {
-        let home_dir = create_temp_dir();
+    fn test_ssh_file_path_default() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert_eq!(
             config.ssh_file_path,
             home_dir.path().join(".ssh").join("id_rsa")
         );
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_notes_dir_from_config_file() {
-        let home_dir = create_temp_dir();
+    fn test_notes_dir_from_config_file() -> Result<()> {
+        let home_dir = create_temp_dir()?;
         let notes_dir = home_dir.path().join("custom-notes-dir");
 
         write_config_file(
@@ -186,44 +199,50 @@ mod tests {
                 "notes_dir = \"{}\"",
                 String::from(notes_dir.to_string_lossy())
             ),
-        );
+        )?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert_eq!(config.notes_dir, notes_dir);
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_auto_save_from_config_file() {
-        let home_dir = create_temp_dir();
+    fn test_auto_save_from_config_file() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
         write_config_file(
             &home_dir,
             String::from("auto_save = true\nrepository = \"something\""),
-        );
+        )?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert!(config.auto_save);
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_repository_from_config_file() {
-        let home_dir = create_temp_dir();
+    fn test_repository_from_config_file() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
-        write_config_file(&home_dir, String::from("repository = \"abc\""));
+        write_config_file(&home_dir, String::from("repository = \"abc\""))?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert_eq!(config.repository, Some(String::from("abc")));
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_ssh_file_path_from_config_file() {
-        let home_dir = create_temp_dir();
+    fn test_ssh_file_path_from_config_file() -> Result<()> {
+        let home_dir = create_temp_dir()?;
         let ssh_file_path = home_dir.path().join("custom-ssh-dir").join("some_id_rsa");
 
         write_config_file(
@@ -232,92 +251,104 @@ mod tests {
                 "ssh_file_path = \"{}\"",
                 String::from(ssh_file_path.to_string_lossy())
             ),
-        );
+        )?;
 
-        let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+        let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
         assert_eq!(config.ssh_file_path, ssh_file_path);
+
+        Ok(())
     }
 
     #[test]
     #[serial]
-    fn test_notes_dir_from_env() {
-        let home_dir = create_temp_dir();
+    fn test_notes_dir_from_env() -> Result<()> {
+        let home_dir = create_temp_dir()?;
         let notes_dir = home_dir.path().join("custom-notes-dir");
 
-        write_config_file(&home_dir, String::from("notes_dir = \"whatever\""));
+        write_config_file(&home_dir, String::from("notes_dir = \"whatever\""))?;
 
         with_env_var(
             "GNOTES_NOTES_DIR",
             notes_dir.to_string_lossy().as_ref(),
             || {
-                let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+                let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
                 assert_eq!(config.notes_dir, notes_dir);
+
+                Ok(())
             },
         )
     }
 
     #[test]
     #[serial]
-    fn test_auto_save_from_env() {
-        let home_dir = create_temp_dir();
+    fn test_auto_save_from_env() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
         write_config_file(
             &home_dir,
             String::from("auto_save = false\nrepository = \"something\""),
-        );
+        )?;
 
         with_env_var("GNOTES_AUTO_SAVE", "true", || {
-            let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+            let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
             assert!(config.auto_save);
+
+            Ok(())
         })
     }
 
     #[test]
     #[serial]
-    fn test_repository_from_env() {
-        let home_dir = create_temp_dir();
+    fn test_repository_from_env() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
-        write_config_file(&home_dir, String::from("repository = \"whatever\""));
+        write_config_file(&home_dir, String::from("repository = \"whatever\""))?;
 
         with_env_var("GNOTES_REPOSITORY", "abc", || {
-            let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+            let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
             assert_eq!(config.repository, Some(String::from("abc")));
+
+            Ok(())
         })
     }
 
     #[test]
     #[serial]
-    fn test_ssh_file_path_from_env() {
-        let home_dir = create_temp_dir();
+    fn test_ssh_file_path_from_env() -> Result<()> {
+        let home_dir = create_temp_dir()?;
         let ssh_file_path = home_dir.path().join("custom-ssh-dir");
 
-        write_config_file(&home_dir, String::from("ssh_file_path = \"whatever\""));
+        write_config_file(&home_dir, String::from("ssh_file_path = \"whatever\""))?;
 
         with_env_var(
             "GNOTES_SSH_FILE_PATH",
             ssh_file_path.to_string_lossy().as_ref(),
             || {
-                let config = load_config(home_dir.as_ref()).expect("Couldn't load config");
+                let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
                 assert_eq!(config.ssh_file_path, ssh_file_path);
+
+                Ok(())
             },
         )
     }
 
     #[test]
     #[serial]
-    fn test_auto_save_on_without_repository() {
-        let home_dir = create_temp_dir();
+    fn test_auto_save_on_without_repository() -> Result<()> {
+        let home_dir = create_temp_dir()?;
 
-        write_config_file(&home_dir, String::from("auto_save = true"));
+        write_config_file(&home_dir, String::from("auto_save = true"))?;
 
         assert!(matches!(
-            load_config(home_dir.as_ref()),
+            load_config(home_dir.path()),
             Err(ConfigError::InvalidConfig(_))
         ));
+
+        Ok(())
     }
 }

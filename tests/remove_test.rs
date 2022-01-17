@@ -21,7 +21,7 @@ fn test_remove_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -43,7 +43,7 @@ fn test_remove_note_alias() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["rm", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -58,7 +58,7 @@ fn test_remove_note_succeeds_when_note_does_not_exist() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -78,7 +78,7 @@ fn test_remove_note_custom_dir() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["remove", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -106,7 +106,7 @@ fn test_remove_note_also_removes_tag() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 

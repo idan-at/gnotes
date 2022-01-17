@@ -27,7 +27,7 @@ fn test_untag_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["untag", DEFAULT_NOTE_FILE_NAME, "tag1"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -61,7 +61,7 @@ fn test_untag_note_custom_dir() -> Result<()> {
             "--dir",
             "custom",
         ])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -88,7 +88,7 @@ fn test_untag_note_removes_tag_if_empty() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["untag", DEFAULT_NOTE_FILE_NAME, "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -104,7 +104,7 @@ fn test_untag_note_does_not_exist() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["untag", DEFAULT_NOTE_FILE_NAME, "tag1"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stderr(format!(
             "untag failed: file '{}' not found\n",
@@ -134,7 +134,7 @@ fn test_untag_note_tag_does_not_exist() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["untag", DEFAULT_NOTE_FILE_NAME, "tag3"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 

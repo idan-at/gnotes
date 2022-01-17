@@ -18,7 +18,7 @@ fn test_show_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["show", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stdout(predicate::str::contains("notes/chores:\n"))
         .stdout(predicate::str::contains("hello"))
@@ -39,7 +39,7 @@ fn test_show_note_custom_dir() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["show", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stdout(predicate::str::contains("custom/chores:\n"))
         .stdout(predicate::str::contains("hello"))
@@ -56,7 +56,7 @@ fn test_show_note_does_not_exist() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["show", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stderr(format!(
             "show failed: file '{}' not found\n",

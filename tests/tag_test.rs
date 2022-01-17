@@ -24,7 +24,7 @@ fn test_tag_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -49,7 +49,7 @@ fn test_tag_note_twice() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag", "tag"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -66,7 +66,7 @@ fn test_tag_note_does_not_exist() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stderr(format!(
             "tag failed: file '{}' not found\n",
@@ -103,7 +103,7 @@ fn test_tag_note_custom_dir() -> Result<()> {
             "tag1",
             "tag2",
         ])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -130,13 +130,13 @@ fn test_tag_note_tag_already_exists_for_different_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
     Command::cargo_bin("gnotes")?
         .args(vec!["tag", "reminders", "tag1"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -162,13 +162,13 @@ fn test_tag_note_tag_already_exists_for_this_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
     Command::cargo_bin("gnotes")?
         .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 

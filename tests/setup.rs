@@ -1,7 +1,7 @@
 // See https://github.com/rust-lang/rust/issues/46379
 #![allow(dead_code)]
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -43,32 +43,53 @@ impl Setup {
 }
 
 pub struct GitSetup {
-    dir: TempDir,
-    pub repo_path: PathBuf,
+    pub bare_dir: TempDir,
+    pub clone_dir: TempDir,
 }
 
 impl GitSetup {
     pub fn new() -> Result<Self> {
-        let dir = TempDir::new("gnotes_repos")?;
+        let bare_dir = GitSetup::create_bare_repository()?;
+        let clone_dir = GitSetup::create_clone_repository(bare_dir.path())?;
 
-        let repo_path = dir.path().join("notes_repo");
+        Ok(Self {
+            bare_dir,
+            clone_dir,
+        })
+    }
 
-        fs::create_dir_all(repo_path.join(DEFAULT_NOTES_DIR_NAME))?;
+    fn create_bare_repository() -> Result<TempDir> {
+        let base_dir = TempDir::new("gnotes_bare_repo")?;
+
+        GitSetup::run_git_command(base_dir.path(), &["init", "--bare", "-b", "master"])?;
+
+        Ok(base_dir)
+    }
+
+    fn create_clone_repository(bare_dir: &Path) -> Result<TempDir> {
+        let bare_dir_str = bare_dir.to_str().context("base_repository_path.to_str()")?;
+
+        let clone_dir = TempDir::new("gnotes_repo_clone")?;
+
+        GitSetup::run_git_command(clone_dir.path(), &["clone", &bare_dir_str, "."])?;
+
+        fs::create_dir(clone_dir.path().join(DEFAULT_NOTES_DIR_NAME))?;
         fs::write(
-            repo_path
-                .join(DEFAULT_NOTES_DIR_NAME)
-                .join(DEFAULT_NOTE_FILE_NAME),
+            GitSetup::build_note_path(clone_dir.path()),
             "file content\n",
         )
-        .expect("Failed to write file content");
+        .context("Failed to write file content")?;
 
-        let repo_path = fs::canonicalize(&repo_path)?;
+        GitSetup::run_git_command(clone_dir.path(), &["add", "."])?;
+        GitSetup::run_git_command(clone_dir.path(), &["commit", "-m", "initial commit"])?;
+        GitSetup::run_git_command(clone_dir.path(), &["push"])?;
 
-        GitSetup::run_git_command(&repo_path, &["init", "--bare", "-b", "master"])?;
-        GitSetup::run_git_command(&repo_path, &["add", "."])?;
-        GitSetup::run_git_command(&repo_path, &["commit", "-m", "initial commit"])?;
+        Ok(clone_dir)
+    }
 
-        Ok(Self { dir, repo_path })
+    pub fn build_note_path(path: &Path) -> PathBuf {
+        path.join(DEFAULT_NOTES_DIR_NAME)
+            .join(DEFAULT_NOTE_FILE_NAME)
     }
 
     fn run_git_command(repo_path: &Path, args: &[&str]) -> Result<()> {

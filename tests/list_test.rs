@@ -27,7 +27,7 @@ fn test_list_notes() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("total 1\n"))
@@ -54,7 +54,7 @@ fn test_list_notes_alias() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["ls"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("total 1\n"))
@@ -69,7 +69,7 @@ fn test_list_notes_does_not_exist() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::eq("total 0\n"));
@@ -85,7 +85,7 @@ fn test_list_notes_ignore_non_directories() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("total 0\n"));
@@ -111,7 +111,7 @@ fn test_list_notes_custom_dir() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list", "--dir", "custom"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("total 1\n"))
@@ -139,7 +139,7 @@ fn test_list_notes_include_headers() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list", "--include-headers"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("total 1\n"))
@@ -177,7 +177,7 @@ fn test_list_notes_all() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("total 2\n"))
@@ -195,7 +195,7 @@ fn test_list_notes_all_ignore_non_directories() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("total 0\n"));
@@ -209,7 +209,7 @@ fn test_list_notes_custom_dir_with_all() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["list", "--dir", "custom", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .code(1)
         .stderr(predicate::eq("--dir can't be used with --all\n"));

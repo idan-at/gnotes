@@ -17,7 +17,7 @@ fn test_search_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["search", "tag"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stdout(predicate::str::contains("total 2\n"))
         .stdout(predicate::str::contains("notes/chores\n"))
@@ -36,7 +36,7 @@ fn test_search_note_no_matches() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["search", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stdout(predicate::eq(""))
         .success();
@@ -53,7 +53,7 @@ fn test_search_note_custom_dir() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["search", "tag", "--dir", "custom"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::contains("custom/reminders\n"))
@@ -71,7 +71,7 @@ fn test_search_note_all() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["search", "tag", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stdout(predicate::str::contains("total 2\n"))
         .stdout(predicate::str::contains("notes/chores\n"))
@@ -95,7 +95,7 @@ fn test_search_note_show() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["search", "tag", "--show"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::contains("notes/chores:\n"))
@@ -111,7 +111,7 @@ fn test_search_note_custom_dir_with_all() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["search", "tag", "--dir", "custom", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .stderr(predicate::eq("--dir can't be used with --all\n"))
         .code(1);

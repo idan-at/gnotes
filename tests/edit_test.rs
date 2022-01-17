@@ -27,7 +27,7 @@ fn test_edit_note() -> Result<()> {
     Command::cargo_bin("gnotes")?
         .args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
         .env("EDITOR", "vim")
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .write_stdin(stdin)
         .assert()
         .success();
@@ -60,7 +60,7 @@ fn test_edit_note_custom_dir() -> Result<()> {
     Command::cargo_bin("gnotes")?
         .args(vec!["edit", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
         .env("EDITOR", "vim")
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .write_stdin(stdin)
         .assert()
         .success();
@@ -88,7 +88,7 @@ fn test_edit_none_existing_note() -> Result<()> {
     Command::cargo_bin("gnotes")?
         .args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
         .env("EDITOR", "vim")
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .write_stdin(stdin)
         .assert()
         .success();

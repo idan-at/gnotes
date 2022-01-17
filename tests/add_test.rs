@@ -14,7 +14,7 @@ fn test_add_to_new_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -40,7 +40,7 @@ fn test_add_custom_dir() -> Result<()> {
             "--dir",
             "custom",
         ])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -66,7 +66,7 @@ fn test_add_to_existing_note() -> Result<()> {
 
     Command::cargo_bin("gnotes")?
         .args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 

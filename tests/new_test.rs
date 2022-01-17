@@ -17,7 +17,7 @@ fn test_new_note_with_message() -> Result<()> {
             "-m",
             "do this and that",
         ])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -44,7 +44,7 @@ fn test_new_note_custom_dir() -> Result<()> {
             "--dir",
             "custom",
         ])
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .assert()
         .success();
 
@@ -72,7 +72,7 @@ fn test_new_note_interactive() -> Result<()> {
     Command::cargo_bin("gnotes")?
         .args(vec!["new", DEFAULT_NOTE_FILE_NAME])
         .env("EDITOR", "vim")
-        .env("GNOTES_NOTES_DIR", setup.dir.as_ref())
+        .env("GNOTES_NOTES_DIR", setup.dir.path())
         .write_stdin(stdin)
         .assert()
         .success();
