@@ -1,42 +1,61 @@
 use anyhow::{Context, Result};
-use git2::{Repository, Signature};
+use git2::{IndexAddOption, Repository, Signature};
 use std::path::Path;
 
 const GNOTES_GIT_USER_NAME: &'static str = "gnotes";
 const GNOTES_GIT_EMAIL: &'static str = "gnotes@gnotes.com";
 
-fn open_repository(repository: &str) -> Result<Repository> {
-    match Repository::open(repository) {
-        Ok(repo) => Ok(repo),
-        Err(_) => Ok(Repository::init(repository)?),
-    }
+fn open_repository(notes_path: &Path, remote: &str) -> Result<Repository> {
+    let repository = match Repository::open(notes_path) {
+        Ok(repository) => repository,
+        Err(_) => {
+            let repository = Repository::init(notes_path)?;
+
+            // TODO: handle the case no remote exists / remote name isn't origin.
+            repository.remote_set_url("origin", remote)?;
+
+            repository
+        }
+    };
+
+    Ok(repository)
 }
 
-pub fn commit_and_push(repository: &str, path: &Path, message: &str) -> Result<()> {
-    let local_repository = open_repository(repository)?;
+pub fn commit_and_push(notes_path: &Path, remote: &str, message: &str) -> Result<()> {
+    let repository = open_repository(notes_path, remote)?;
 
-    let remotes_list = local_repository.remotes()?;
+    let remotes_list = repository.remotes()?;
     let remote_name = remotes_list.get(0).context("Failed to find remote")?;
-    let mut remote = local_repository.find_remote(remote_name)?;
+    let mut remote = repository.find_remote(remote_name)?;
 
-    let mut index = local_repository.index()?;
-    index.add_path(path)?;
+    let mut index = repository.index()?;
+    index.add_all(["."].iter(), IndexAddOption::CHECK_PATHSPEC, None)?;
     index.write()?;
 
     let tree_id = index.write_tree()?;
 
     let signature = Signature::now(GNOTES_GIT_USER_NAME, GNOTES_GIT_EMAIL)?;
 
-    local_repository.commit(
+    let parent = repository
+        .head()
+        .ok()
+        .and_then(|h| h.target())
+        .expect("TODO: handle empty repository");
+    let parent = repository
+        .find_commit(parent)
+        .context("Failed to find commit for parent")?;
+
+    repository.commit(
         Some("HEAD"),
         &signature,
         &signature,
         &message,
-        &local_repository.find_tree(tree_id)?,
-        &[],
+        &repository.find_tree(tree_id)?,
+        &[&parent],
     )?;
 
-    remote.push::<&str>(&[], None)?;
+    // TODO: find the ref dynamically?
+    remote.push::<&str>(&["refs/heads/master"], None)?;
 
     Ok(())
 }

@@ -11,7 +11,7 @@ use std::time::SystemTime;
 fn now() -> String {
     let date_time: DateTime<Utc> = SystemTime::now().into();
 
-    format!("{}", date_time.format("%Y-%m-%d][%H:%M:%S"))
+    format!("{}", date_time.format("[%Y-%m-%d][%H:%M:%S]"))
 }
 
 #[derive(Debug, Parser)]
@@ -31,7 +31,7 @@ impl Run for SaveCommand {
 
         match &config.repository {
             Some(repository) => {
-                commit_and_push(repository, &config.notes_dir, &message)?;
+                commit_and_push(&config.notes_dir, repository, &message)?;
             }
             _ => {
                 eprintln!("Can't save without a repository. Please specify a repository in the config file.");

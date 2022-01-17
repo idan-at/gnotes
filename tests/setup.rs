@@ -58,6 +58,25 @@ impl GitSetup {
         })
     }
 
+    pub fn build_note_path(path: &Path) -> PathBuf {
+        path.join(DEFAULT_NOTES_DIR_NAME)
+            .join(DEFAULT_NOTE_FILE_NAME)
+    }
+
+    pub fn clone_to(from: &Path, to: &Path) -> Result<()> {
+        let from_str = from.to_str().context("from.to_str()")?;
+
+        GitSetup::run_git_command(to, &["clone", &from_str, "."])?;
+
+        Ok(())
+    }
+
+    pub fn update_clone(&self) -> Result<()> {
+        GitSetup::run_git_command(self.clone_dir.path(), &["pull"])?;
+
+        Ok(())
+    }
+
     fn create_bare_repository() -> Result<TempDir> {
         let base_dir = TempDir::new("gnotes_bare_repo")?;
 
@@ -67,11 +86,9 @@ impl GitSetup {
     }
 
     fn create_clone_repository(bare_dir: &Path) -> Result<TempDir> {
-        let bare_dir_str = bare_dir.to_str().context("base_repository_path.to_str()")?;
-
         let clone_dir = TempDir::new("gnotes_repo_clone")?;
 
-        GitSetup::run_git_command(clone_dir.path(), &["clone", &bare_dir_str, "."])?;
+        GitSetup::clone_to(bare_dir, clone_dir.path())?;
 
         fs::create_dir(clone_dir.path().join(DEFAULT_NOTES_DIR_NAME))?;
         fs::write(
@@ -85,11 +102,6 @@ impl GitSetup {
         GitSetup::run_git_command(clone_dir.path(), &["push"])?;
 
         Ok(clone_dir)
-    }
-
-    pub fn build_note_path(path: &Path) -> PathBuf {
-        path.join(DEFAULT_NOTES_DIR_NAME)
-            .join(DEFAULT_NOTE_FILE_NAME)
     }
 
     fn run_git_command(repo_path: &Path, args: &[&str]) -> Result<()> {
