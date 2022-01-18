@@ -64,7 +64,7 @@ pub fn commit_and_push(notes_path: &Path, remote: &str, message: &str) -> Result
     };
 
     // TODO: find the ref dynamically?
-    remote.push::<&str>(&["refs/heads/master"], None)?;
+    remote.push::<&str>(&["refs/heads/main"], None)?;
 
     Ok(())
 }

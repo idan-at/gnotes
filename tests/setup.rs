@@ -92,7 +92,7 @@ impl GitSetup {
     fn create_bare_repository() -> Result<TempDir> {
         let base_dir = TempDir::new("gnotes_bare_repo")?;
 
-        GitSetup::run_git_command(base_dir.path(), &["init", "--bare", "-b", "master"])?;
+        GitSetup::run_git_command(base_dir.path(), &["init", "--bare", "-b", "main"])?;
 
         Ok(base_dir)
     }
