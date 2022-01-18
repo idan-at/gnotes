@@ -48,12 +48,12 @@ pub struct GitSetup {
 }
 
 pub struct GitSetupOptions {
-    pub with_clone: bool,
+    pub with_changes: bool,
 }
 
 impl Default for GitSetupOptions {
     fn default() -> Self {
-        Self { with_clone: true }
+        Self { with_changes: true }
     }
 }
 
@@ -62,7 +62,7 @@ impl GitSetup {
         let options = options.unwrap_or_default();
 
         let bare_dir = GitSetup::create_bare_repository()?;
-        let clone_dir = GitSetup::create_clone_repository(bare_dir.path(), options.with_clone)?;
+        let clone_dir = GitSetup::create_clone_repository(bare_dir.path(), options.with_changes)?;
 
         Ok(Self {
             bare_dir,
@@ -97,13 +97,12 @@ impl GitSetup {
         Ok(base_dir)
     }
 
-    fn create_clone_repository(bare_dir: &Path, with_clone: bool) -> Result<TempDir> {
+    fn create_clone_repository(bare_dir: &Path, with_changes: bool) -> Result<TempDir> {
         let clone_dir = TempDir::new("gnotes_repo_clone")?;
 
         GitSetup::clone_to(bare_dir, clone_dir.path())?;
 
-        // TODO: rename to something with empty.
-        if with_clone {
+        if with_changes {
             fs::create_dir(clone_dir.path().join(DEFAULT_NOTES_DIR_NAME))?;
             fs::write(
                 GitSetup::build_note_path(clone_dir.path()),

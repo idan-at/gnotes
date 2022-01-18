@@ -22,7 +22,9 @@ fn test_save_fails_without_repository() -> Result<()> {
 #[test]
 fn test_save_succeeds_on_empty_repository() -> Result<()> {
     let setup = Setup::new()?;
-    let git_setup = GitSetup::new(Some(GitSetupOptions { with_clone: false }))?;
+    let git_setup = GitSetup::new(Some(GitSetupOptions {
+        with_changes: false,
+    }))?;
 
     GitSetup::clone_to(git_setup.bare_dir.path(), setup.dir.path())?;
 
