@@ -1,5 +1,6 @@
 use log::debug;
 use serde::Deserialize;
+use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use thiserror::Error;
@@ -48,7 +49,6 @@ pub struct Config {
     pub notes_dir: PathBuf,
     pub auto_save: bool,
     pub repository: Option<String>,
-    // TODO: canonicalize
     pub ssh_file_path: PathBuf,
 }
 
@@ -82,23 +82,31 @@ pub fn load_config(home_dir: &Path) -> Result<Config, ConfigError> {
 
     debug!("merged config {:?}", external_config);
 
-    let config = Config {
-        notes_dir: external_config
-            .notes_dir
-            .unwrap_or(home_dir.join(GNOTES_DIR_NAME)),
-        auto_save: external_config.auto_save.unwrap_or_default(),
-        repository: external_config.repository,
-        ssh_file_path: external_config
-            .ssh_file_path
-            .unwrap_or(home_dir.join(".ssh").join("id_rsa")),
-    };
+    let ssh_file_path = external_config
+        .ssh_file_path
+        .unwrap_or(home_dir.join(".ssh").join("id_rsa"));
 
-    if config.auto_save && config.repository.is_none() {
-        Err(ConfigError::InvalidConfig(String::from(
-            "repository is mandatory when auto_save is enabled",
-        )))
+    if let Ok(ssh_file_path) = fs::canonicalize(ssh_file_path) {
+        let config = Config {
+            notes_dir: external_config
+                .notes_dir
+                .unwrap_or(home_dir.join(GNOTES_DIR_NAME)),
+            auto_save: external_config.auto_save.unwrap_or_default(),
+            repository: external_config.repository,
+            ssh_file_path,
+        };
+
+        if config.auto_save && config.repository.is_none() {
+            Err(ConfigError::InvalidConfig(String::from(
+                "repository is mandatory when auto_save is enabled",
+            )))
+        } else {
+            Ok(config)
+        }
     } else {
-        Ok(config)
+        Err(ConfigError::InvalidConfig(String::from(
+            "Failed to canonicalize ssh_file_path",
+        )))
     }
 }
 
@@ -108,12 +116,16 @@ mod tests {
     use anyhow::{Context, Result};
     use serial_test::serial;
     use std::env;
-    use std::fs;
     use tempdir::TempDir;
 
     fn create_temp_dir() -> Result<TempDir> {
-        Ok(TempDir::new("gnotes_config_test")
-            .context("config tests: Failed to create a temporary directory")?)
+        let temp_dir = TempDir::new("gnotes_config_test")
+            .context("config tests: Failed to create a temporary directory")?;
+
+        fs::create_dir(temp_dir.path().join(".ssh"))?;
+        fs::write(temp_dir.path().join(".ssh").join("id_rsa"), "")?;
+
+        Ok(temp_dir)
     }
 
     fn write_config_file(home_dir: &TempDir, content: String) -> Result<()> {
@@ -182,7 +194,7 @@ mod tests {
 
         assert_eq!(
             config.ssh_file_path,
-            home_dir.path().join(".ssh").join("id_rsa")
+            fs::canonicalize(home_dir.path().join(".ssh").join("id_rsa"))?
         );
 
         Ok(())
@@ -246,6 +258,9 @@ mod tests {
         let home_dir = create_temp_dir()?;
         let ssh_file_path = home_dir.path().join("custom-ssh-dir").join("some_id_rsa");
 
+        fs::create_dir(home_dir.path().join("custom-ssh-dir"))?;
+        fs::write(&ssh_file_path, "")?;
+
         write_config_file(
             &home_dir,
             format!(
@@ -256,7 +271,7 @@ mod tests {
 
         let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
-        assert_eq!(config.ssh_file_path, ssh_file_path);
+        assert_eq!(config.ssh_file_path, fs::canonicalize(ssh_file_path)?);
 
         Ok(())
     }
@@ -321,7 +336,11 @@ mod tests {
     #[serial]
     fn test_ssh_file_path_from_env() -> Result<()> {
         let home_dir = create_temp_dir()?;
-        let ssh_file_path = home_dir.path().join("custom-ssh-dir");
+        let ssh_file_path = home_dir.path().join("custom-ssh-file");
+
+        fs::write(&ssh_file_path, "")?;
+
+        let expected = fs::canonicalize(&ssh_file_path)?;
 
         write_config_file(&home_dir, String::from("ssh_file_path = \"whatever\""))?;
 
@@ -331,7 +350,7 @@ mod tests {
             || {
                 let config = load_config(home_dir.path()).context("Couldn't load config")?;
 
-                assert_eq!(config.ssh_file_path, ssh_file_path);
+                assert_eq!(config.ssh_file_path, expected);
 
                 Ok(())
             },
@@ -344,6 +363,23 @@ mod tests {
         let home_dir = create_temp_dir()?;
 
         write_config_file(&home_dir, String::from("auto_save = true"))?;
+
+        assert!(matches!(
+            load_config(home_dir.path()),
+            Err(ConfigError::InvalidConfig(_))
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    #[serial]
+    fn test_ssh_file_path_is_canonicalized_failure() -> Result<()> {
+        let home_dir = create_temp_dir()?;
+
+        let ssh_file_path = "~/.ssh/id_rsa_gnotes_tests";
+
+        write_config_file(&home_dir, format!("ssh_file_path = \"{}\"", ssh_file_path))?;
 
         assert!(matches!(
             load_config(home_dir.path()),
