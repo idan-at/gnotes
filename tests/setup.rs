@@ -47,10 +47,22 @@ pub struct GitSetup {
     pub clone_dir: TempDir,
 }
 
+pub struct GitSetupOptions {
+    pub with_clone: bool,
+}
+
+impl Default for GitSetupOptions {
+    fn default() -> Self {
+        Self { with_clone: true }
+    }
+}
+
 impl GitSetup {
-    pub fn new() -> Result<Self> {
+    pub fn new(options: Option<GitSetupOptions>) -> Result<Self> {
+        let options = options.unwrap_or_default();
+
         let bare_dir = GitSetup::create_bare_repository()?;
-        let clone_dir = GitSetup::create_clone_repository(bare_dir.path())?;
+        let clone_dir = GitSetup::create_clone_repository(bare_dir.path(), options.with_clone)?;
 
         Ok(Self {
             bare_dir,
@@ -85,21 +97,24 @@ impl GitSetup {
         Ok(base_dir)
     }
 
-    fn create_clone_repository(bare_dir: &Path) -> Result<TempDir> {
+    fn create_clone_repository(bare_dir: &Path, with_clone: bool) -> Result<TempDir> {
         let clone_dir = TempDir::new("gnotes_repo_clone")?;
 
         GitSetup::clone_to(bare_dir, clone_dir.path())?;
 
-        fs::create_dir(clone_dir.path().join(DEFAULT_NOTES_DIR_NAME))?;
-        fs::write(
-            GitSetup::build_note_path(clone_dir.path()),
-            "file content\n",
-        )
-        .context("Failed to write file content")?;
+        // TODO: rename to something with empty.
+        if with_clone {
+            fs::create_dir(clone_dir.path().join(DEFAULT_NOTES_DIR_NAME))?;
+            fs::write(
+                GitSetup::build_note_path(clone_dir.path()),
+                "file content\n",
+            )
+            .context("Failed to write file content")?;
 
-        GitSetup::run_git_command(clone_dir.path(), &["add", "."])?;
-        GitSetup::run_git_command(clone_dir.path(), &["commit", "-m", "initial commit"])?;
-        GitSetup::run_git_command(clone_dir.path(), &["push"])?;
+            GitSetup::run_git_command(clone_dir.path(), &["add", "."])?;
+            GitSetup::run_git_command(clone_dir.path(), &["commit", "-m", "initial commit"])?;
+            GitSetup::run_git_command(clone_dir.path(), &["push"])?;
+        }
 
         Ok(clone_dir)
     }

@@ -5,6 +5,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use setup::{GitSetup, Setup};
 
+// TODO: Can't run this test when the config file is present on the machine.
 #[test]
 fn test_clone_fails_without_repository() -> Result<()> {
     Command::cargo_bin("gnotes")?
@@ -21,7 +22,7 @@ fn test_clone_fails_without_repository() -> Result<()> {
 #[test]
 fn test_clone_succeeds() -> Result<()> {
     let setup = Setup::new()?;
-    let git_setup = GitSetup::new()?;
+    let git_setup = GitSetup::new(None)?;
 
     // TODO: Provide id_rsa explicitly (ATM this assumes ~/.ssh/id_rsa exists)
     Command::cargo_bin("gnotes")?

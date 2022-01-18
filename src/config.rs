@@ -48,6 +48,7 @@ pub struct Config {
     pub notes_dir: PathBuf,
     pub auto_save: bool,
     pub repository: Option<String>,
+    // TODO: canonicalize
     pub ssh_file_path: PathBuf,
 }
 

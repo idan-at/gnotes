@@ -6,7 +6,8 @@ gnotes is a simple cli that allows you to easily add and edit notes without leav
 1. Build from scratch:
 
 - `git clone git@github.com:idan-at/gnotes.git`
-- `cargo install`
+- `cd gnotes`
+- `cargo install --path .`
 
 ## Commands
 

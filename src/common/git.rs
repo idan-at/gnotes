@@ -36,23 +36,32 @@ pub fn commit_and_push(notes_path: &Path, remote: &str, message: &str) -> Result
 
     let signature = Signature::now(GNOTES_GIT_USER_NAME, GNOTES_GIT_EMAIL)?;
 
-    let parent = repository
-        .head()
-        .ok()
-        .and_then(|h| h.target())
-        .expect("TODO: handle empty repository");
-    let parent = repository
-        .find_commit(parent)
-        .context("Failed to find commit for parent")?;
+    match repository.head().ok().and_then(|h| h.target()) {
+        Some(parent) => {
+            let parent = repository
+                .find_commit(parent)
+                .context("Failed to find commit for parent")?;
 
-    repository.commit(
-        Some("HEAD"),
-        &signature,
-        &signature,
-        &message,
-        &repository.find_tree(tree_id)?,
-        &[&parent],
-    )?;
+            repository.commit(
+                Some("HEAD"),
+                &signature,
+                &signature,
+                &message,
+                &repository.find_tree(tree_id)?,
+                &[&parent],
+            )?;
+        }
+        _ => {
+            repository.commit(
+                Some("HEAD"),
+                &signature,
+                &signature,
+                &message,
+                &repository.find_tree(tree_id)?,
+                &[],
+            )?;
+        }
+    };
 
     // TODO: find the ref dynamically?
     remote.push::<&str>(&["refs/heads/master"], None)?;
