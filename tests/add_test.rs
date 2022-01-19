@@ -2,7 +2,6 @@ mod setup;
 
 use crate::setup::DEFAULT_NOTE_FILE_NAME;
 use anyhow::Result;
-use assert_cmd::Command;
 use gnotes::common::notes::write_note;
 use setup::Setup;
 use std::fs;
@@ -12,10 +11,8 @@ fn test_add_to_new_note() -> Result<()> {
     let setup = Setup::new()?;
     let expected_note_file_path = setup.default_note_path();
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["add", DEFAULT_NOTE_FILE_NAME, "do this and that"], None)?
         .success();
 
     assert!(expected_note_file_path.exists());
@@ -32,16 +29,17 @@ fn test_add_custom_dir() -> Result<()> {
     let setup = Setup::new()?;
     let expected_note_file_path = setup.note_path("custom");
 
-    Command::cargo_bin("gnotes")?
-        .args(vec![
-            "add",
-            DEFAULT_NOTE_FILE_NAME,
-            "do this and that",
-            "--dir",
-            "custom",
-        ])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(
+            &[
+                "add",
+                DEFAULT_NOTE_FILE_NAME,
+                "do this and that",
+                "--dir",
+                "custom",
+            ],
+            None,
+        )?
         .success();
 
     assert!(expected_note_file_path.exists());
@@ -64,10 +62,8 @@ fn test_add_to_existing_note() -> Result<()> {
         "hello",
     )?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["add", DEFAULT_NOTE_FILE_NAME, "do this and that"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["add", DEFAULT_NOTE_FILE_NAME, "do this and that"], None)?
         .success();
 
     assert_eq!(

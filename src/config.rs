@@ -1,5 +1,5 @@
 use log::debug;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -44,7 +44,7 @@ impl ExternalConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Config {
     pub notes_dir: PathBuf,
     pub auto_save: bool,
@@ -86,7 +86,7 @@ pub fn load_config(home_dir: &Path) -> Result<Config, ConfigError> {
         .ssh_file_path
         .unwrap_or(home_dir.join(".ssh").join("id_rsa"));
 
-    if let Ok(ssh_file_path) = fs::canonicalize(ssh_file_path) {
+    if let Ok(ssh_file_path) = fs::canonicalize(&ssh_file_path) {
         let config = Config {
             notes_dir: external_config
                 .notes_dir
@@ -104,8 +104,9 @@ pub fn load_config(home_dir: &Path) -> Result<Config, ConfigError> {
             Ok(config)
         }
     } else {
-        Err(ConfigError::InvalidConfig(String::from(
-            "Failed to canonicalize ssh_file_path",
+        Err(ConfigError::InvalidConfig(format!(
+            "Failed to canonicalize ssh_file_path: '{:?}'",
+            ssh_file_path,
         )))
     }
 }

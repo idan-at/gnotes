@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use gnotes::commands::{
     AddCommand, CloneCommand, EditCommand, ListCommand, NewCommand, RemoveCommand, SaveCommand,
@@ -7,6 +7,8 @@ use gnotes::commands::{
 use gnotes::config::load_config;
 use gnotes::run::Run;
 use log::{debug, LevelFilter};
+use std::env;
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 struct Cli {
@@ -43,6 +45,16 @@ fn init_logger(debug: bool) {
     env_logger::builder().filter_level(level).init()
 }
 
+fn get_home_dir() -> Result<PathBuf> {
+    let home_dir = if let Ok(dir) = env::var("GNOTES_HOME_DIR") {
+        PathBuf::from(dir)
+    } else {
+        dirs::home_dir().context("Unexpected error: home directory can't be located.")?
+    };
+
+    Ok(home_dir)
+}
+
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
@@ -50,7 +62,7 @@ fn main() -> Result<()> {
 
     debug!("cli options {:?}", cli);
 
-    let home_dir = dirs::home_dir().expect("Unexpected error: home directory can't be located.");
+    let home_dir = get_home_dir()?;
     let config = load_config(&home_dir)?;
 
     debug!("loaded config {:?}", config);

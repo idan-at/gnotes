@@ -1,7 +1,6 @@
 mod setup;
 
 use anyhow::{Context, Result};
-use assert_cmd::Command;
 use gnotes::common::notes::write_note;
 use predicates::prelude::*;
 use setup::{Setup, DEFAULT_NOTE_FILE_NAME};
@@ -16,10 +15,8 @@ fn test_show_note() -> Result<()> {
         "hello",
     )?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["show", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["show", DEFAULT_NOTE_FILE_NAME], None)?
         .stdout(predicate::str::contains("notes/chores:\n"))
         .stdout(predicate::str::contains("hello"))
         .success();
@@ -37,10 +34,8 @@ fn test_show_note_custom_dir() -> Result<()> {
         "hello",
     )?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["show", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["show", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"], None)?
         .stdout(predicate::str::contains("custom/chores:\n"))
         .stdout(predicate::str::contains("hello"))
         .success();
@@ -54,10 +49,8 @@ fn test_show_note_does_not_exist() -> Result<()> {
 
     let note_file_path = setup.default_note_path();
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["show", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["show", DEFAULT_NOTE_FILE_NAME], None)?
         .stderr(format!(
             "show failed: file '{}' not found\n",
             note_file_path.to_str().context("note_file_path.to_str()")?

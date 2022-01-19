@@ -1,8 +1,8 @@
 mod setup;
 
+use crate::setup::RunOptions;
 use crate::setup::DEFAULT_NOTE_FILE_NAME;
 use anyhow::Result;
-use assert_cmd::Command;
 use gnotes::common::notes::write_note;
 use setup::Setup;
 use std::fs;
@@ -24,12 +24,13 @@ fn test_edit_note() -> Result<()> {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
-        .env("EDITOR", "vim")
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .write_stdin(stdin)
-        .assert()
+    let run_options = RunOptions {
+        stdin: Some(stdin),
+        repository: None,
+    };
+
+    setup
+        .run(&["edit", DEFAULT_NOTE_FILE_NAME], Some(run_options))?
         .success();
 
     assert_eq!(
@@ -57,12 +58,16 @@ fn test_edit_note_custom_dir() -> Result<()> {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["edit", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
-        .env("EDITOR", "vim")
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .write_stdin(stdin)
-        .assert()
+    let run_options = RunOptions {
+        stdin: Some(stdin),
+        repository: None,
+    };
+
+    setup
+        .run(
+            &["edit", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"],
+            Some(run_options),
+        )?
         .success();
 
     assert_eq!(
@@ -85,12 +90,13 @@ fn test_edit_none_existing_note() -> Result<()> {
     stdin.push(27 as char); // ESC
     stdin.push_str(":wq\n");
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["edit", DEFAULT_NOTE_FILE_NAME])
-        .env("EDITOR", "vim")
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .write_stdin(stdin)
-        .assert()
+    let run_options = RunOptions {
+        stdin: Some(stdin),
+        repository: None,
+    };
+
+    setup
+        .run(&["edit", DEFAULT_NOTE_FILE_NAME], Some(run_options))?
         .success();
 
     assert!(expected_note_file_path.exists());

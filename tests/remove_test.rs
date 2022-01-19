@@ -1,7 +1,6 @@
 mod setup;
 
 use anyhow::Result;
-use assert_cmd::Command;
 use gnotes::common::notes::write_note;
 use gnotes::common::tags::{load_tags, update_tags};
 use maplit::{hashmap, hashset};
@@ -19,10 +18,8 @@ fn test_remove_note() -> Result<()> {
         "hello",
     )?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["remove", DEFAULT_NOTE_FILE_NAME], None)?
         .success();
 
     assert!(!note_file_path.exists());
@@ -41,11 +38,7 @@ fn test_remove_note_alias() -> Result<()> {
         "hello",
     )?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["rm", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
-        .success();
+    setup.run(&["rm", DEFAULT_NOTE_FILE_NAME], None)?.success();
 
     assert!(!note_file_path.exists());
 
@@ -56,10 +49,8 @@ fn test_remove_note_alias() -> Result<()> {
 fn test_remove_note_succeeds_when_note_does_not_exist() -> Result<()> {
     let setup = Setup::new()?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["remove", DEFAULT_NOTE_FILE_NAME], None)?
         .success();
 
     Ok(())
@@ -76,10 +67,8 @@ fn test_remove_note_custom_dir() -> Result<()> {
         "hello",
     )?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["remove", DEFAULT_NOTE_FILE_NAME, "--dir", "custom"], None)?
         .success();
 
     assert!(!note_file_path.exists());
@@ -98,20 +87,18 @@ fn test_remove_note_also_removes_tag() -> Result<()> {
         DEFAULT_NOTE_FILE_NAME,
         "hello",
     )?;
-    update_tags(setup.dir.path(), &tags)?;
+    update_tags(setup.notes_dir_path(), &tags)?;
 
     let expected_tags = hashmap! {
         String::from("tag1") => hashset! { String::from("notes/reminders") }
     };
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["remove", DEFAULT_NOTE_FILE_NAME])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["remove", DEFAULT_NOTE_FILE_NAME], None)?
         .success();
 
     assert!(!note_file_path.exists());
-    assert_eq!(load_tags(setup.dir.path())?, expected_tags);
+    assert_eq!(load_tags(setup.notes_dir_path())?, expected_tags);
 
     Ok(())
 }

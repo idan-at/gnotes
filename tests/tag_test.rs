@@ -1,7 +1,6 @@
 mod setup;
 
 use anyhow::{Context, Result};
-use assert_cmd::Command;
 use gnotes::common::notes::write_note;
 use gnotes::common::tags::load_tags;
 use maplit::{hashmap, hashset};
@@ -22,13 +21,11 @@ fn test_tag_note() -> Result<()> {
       String::from("tag2") => hashset! { String::from("notes/chores") },
     };
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"], None)?
         .success();
 
-    assert_eq!(load_tags(setup.dir.path())?, expected);
+    assert_eq!(load_tags(setup.notes_dir_path())?, expected);
 
     Ok(())
 }
@@ -47,13 +44,11 @@ fn test_tag_note_twice() -> Result<()> {
       String::from("tag") => hashset! { String::from("notes/chores") },
     };
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag", "tag"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["tag", DEFAULT_NOTE_FILE_NAME, "tag", "tag"], None)?
         .success();
 
-    assert_eq!(load_tags(setup.dir.path())?, expected);
+    assert_eq!(load_tags(setup.notes_dir_path())?, expected);
 
     Ok(())
 }
@@ -62,12 +57,10 @@ fn test_tag_note_twice() -> Result<()> {
 fn test_tag_note_does_not_exist() -> Result<()> {
     let setup = Setup::new()?;
     let note_file_path = setup.default_note_path();
-    let tags_file_path = setup.dir.path().join(".tags");
+    let tags_file_path = setup.notes_dir_path().join(".tags");
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"], None)?
         .stderr(format!(
             "tag failed: file '{}' not found\n",
             note_file_path.to_str().context("note_file_path.to_str()")?
@@ -94,20 +87,21 @@ fn test_tag_note_custom_dir() -> Result<()> {
       String::from("tag2") => hashset! { String::from("custom/chores") },
     };
 
-    Command::cargo_bin("gnotes")?
-        .args(vec![
-            "tag",
-            DEFAULT_NOTE_FILE_NAME,
-            "--dir",
-            "custom",
-            "tag1",
-            "tag2",
-        ])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(
+            &[
+                "tag",
+                DEFAULT_NOTE_FILE_NAME,
+                "--dir",
+                "custom",
+                "tag1",
+                "tag2",
+            ],
+            None,
+        )?
         .success();
 
-    assert_eq!(load_tags(setup.dir.path())?, expected);
+    assert_eq!(load_tags(setup.notes_dir_path())?, expected);
 
     Ok(())
 }
@@ -128,19 +122,13 @@ fn test_tag_note_tag_already_exists_for_different_note() -> Result<()> {
       String::from("tag2") => hashset! { String::from("notes/chores") },
     };
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"], None)?
         .success();
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["tag", "reminders", "tag1"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
-        .success();
+    setup.run(&["tag", "reminders", "tag1"], None)?.success();
 
-    assert_eq!(load_tags(setup.dir.path())?, expected);
+    assert_eq!(load_tags(setup.notes_dir_path())?, expected);
 
     Ok(())
 }
@@ -160,19 +148,15 @@ fn test_tag_note_tag_already_exists_for_this_note() -> Result<()> {
       String::from("tag2") => hashset! { String::from("notes/chores") },
     };
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"], None)?
         .success();
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["tag", DEFAULT_NOTE_FILE_NAME, "tag1", "tag2"], None)?
         .success();
 
-    assert_eq!(load_tags(setup.dir.path())?, expected);
+    assert_eq!(load_tags(setup.notes_dir_path())?, expected);
 
     Ok(())
 }

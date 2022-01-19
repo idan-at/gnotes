@@ -1,7 +1,10 @@
 // See https://github.com/rust-lang/rust/issues/46379
 #![allow(dead_code)]
 
+// TODO: split to multiple files
 use anyhow::{Context, Result};
+use assert_cmd::assert::Assert;
+use gnotes::config::Config;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -11,22 +14,67 @@ pub const DEFAULT_NOTES_DIR_NAME: &'static str = "notes";
 pub const DEFAULT_NOTE_FILE_NAME: &'static str = "chores";
 
 pub struct Setup {
-    pub dir: TempDir,
+    home_dir: TempDir,
+    notes_dir: TempDir,
+}
+
+pub struct RunOptions {
+    pub stdin: Option<String>,
+    pub repository: Option<PathBuf>,
+}
+
+impl Default for RunOptions {
+    fn default() -> Self {
+        RunOptions {
+            stdin: None,
+            repository: None,
+        }
+    }
 }
 
 impl Setup {
     pub fn new() -> Result<Self> {
         Ok(Self {
-            dir: TempDir::new("gnotes_test")?,
+            home_dir: TempDir::new("gnotes_home")?,
+            notes_dir: TempDir::new("gnotes_test")?,
         })
     }
 
-    pub fn dir_path(&self) -> &Path {
-        self.dir.path()
+    pub fn run(&self, args: &[&str], options: Option<RunOptions>) -> Result<Assert> {
+        let options = options.unwrap_or_default();
+        let ssh_file_path = self.home_dir.path().join("id_rsa");
+
+        let config = Config {
+            notes_dir: self.notes_dir.path().to_path_buf(),
+            auto_save: false,
+            repository: options
+                .repository
+                .map(|p| String::from(p.to_string_lossy())),
+            ssh_file_path: ssh_file_path.to_path_buf(),
+        };
+
+        fs::write(&ssh_file_path, "TODO: write a valid id_rsa inside")?;
+        fs::write(
+            self.home_dir.path().join(".gnotes.toml"),
+            toml::to_string(&config)?,
+        )?;
+
+        let stdin: String = options.stdin.unwrap_or_default();
+
+        Ok(assert_cmd::Command::cargo_bin("gnotes")?
+            .args(args)
+            .env("EDITOR", "vim")
+            .env("GNOTES_HOME_DIR", self.home_dir.path())
+            .write_stdin(stdin)
+            .assert())
+    }
+
+    pub fn notes_dir_path(&self) -> &Path {
+        self.notes_dir.path()
     }
 
     pub fn note_parent_dir(&self, dir: &str) -> PathBuf {
-        self.dir_path().join(dir)
+        self.notes_dir_path().join(dir)
     }
 
     pub fn default_note_parent_dir(&self) -> PathBuf {

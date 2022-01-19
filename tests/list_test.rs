@@ -1,9 +1,7 @@
 mod setup;
 
-use crate::setup::DEFAULT_NOTES_DIR_NAME;
 use crate::setup::DEFAULT_NOTE_FILE_NAME;
 use anyhow::{Context, Result};
-use assert_cmd::Command;
 use gnotes::common::notes::write_note;
 use predicates::prelude::*;
 use setup::Setup;
@@ -25,10 +23,8 @@ fn test_list_notes() -> Result<()> {
         note_file_path.to_str().context("note_file_path.to_str()")?
     );
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list"], None)?
         .success()
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::is_match(expected_line_regex)?);
@@ -52,10 +48,8 @@ fn test_list_notes_alias() -> Result<()> {
         note_file_path.to_str().context("note_file_path.to_str()")?
     );
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["ls"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["ls"], None)?
         .success()
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::is_match(expected_line_regex)?);
@@ -67,12 +61,10 @@ fn test_list_notes_alias() -> Result<()> {
 fn test_list_notes_does_not_exist() -> Result<()> {
     let setup = Setup::new()?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list"], None)?
         .success()
-        .stdout(predicate::eq("total 0\n"));
+        .stdout(predicate::str::contains("total 0\n"));
 
     Ok(())
 }
@@ -81,12 +73,10 @@ fn test_list_notes_does_not_exist() -> Result<()> {
 fn test_list_notes_ignore_non_directories() -> Result<()> {
     let setup = Setup::new()?;
 
-    fs::write(&setup.dir.path().join(DEFAULT_NOTES_DIR_NAME), "hello\n")?;
+    fs::write(&setup.default_note_parent_dir(), "hello\n")?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list"], None)?
         .success()
         .stdout(predicate::str::contains("total 0\n"));
 
@@ -109,10 +99,8 @@ fn test_list_notes_custom_dir() -> Result<()> {
         note_file_path.to_str().context("note_file_path.to_str()")?
     );
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list", "--dir", "custom"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list", "--dir", "custom"], None)?
         .success()
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::is_match(expected_line_regex)?);
@@ -137,10 +125,8 @@ fn test_list_notes_include_headers() -> Result<()> {
         note_file_path.to_str().context("note_file_path.to_str()")?
     );
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list", "--include-headers"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list", "--include-headers"], None)?
         .success()
         .stdout(predicate::str::contains("total 1\n"))
         .stdout(predicate::str::is_match(expected_headers_line_regex)?)
@@ -153,14 +139,18 @@ fn test_list_notes_include_headers() -> Result<()> {
 fn test_list_notes_all() -> Result<()> {
     let setup = Setup::new()?;
     let note1_file_path = setup.default_note_path();
-    let note2_file_path = setup.dir.path().join("reminders").join("doctor");
+    let note2_file_path = setup.notes_dir_path().join("reminders").join("doctor");
 
     write_note(
         &setup.default_note_parent_dir(),
         DEFAULT_NOTE_FILE_NAME,
         "hello",
     )?;
-    write_note(&setup.dir.path().join("reminders"), "doctor", "goodbye")?;
+    write_note(
+        &setup.notes_dir_path().join("reminders"),
+        "doctor",
+        "goodbye",
+    )?;
 
     let expected_line1_regex = format!(
         ".+ 6 .+{}",
@@ -175,10 +165,8 @@ fn test_list_notes_all() -> Result<()> {
             .context("note2_file_path.to_str()")?
     );
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list", "--all"], None)?
         .success()
         .stdout(predicate::str::contains("total 2\n"))
         .stdout(predicate::str::is_match(expected_line1_regex)?)
@@ -191,12 +179,10 @@ fn test_list_notes_all() -> Result<()> {
 fn test_list_notes_all_ignore_non_directories() -> Result<()> {
     let setup = Setup::new()?;
 
-    fs::write(&setup.dir.path().join(DEFAULT_NOTES_DIR_NAME), "hello\n")?;
+    fs::write(&setup.default_note_parent_dir(), "hello\n")?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list", "--all"], None)?
         .success()
         .stdout(predicate::str::contains("total 0\n"));
 
@@ -207,10 +193,8 @@ fn test_list_notes_all_ignore_non_directories() -> Result<()> {
 fn test_list_notes_custom_dir_with_all() -> Result<()> {
     let setup = Setup::new()?;
 
-    Command::cargo_bin("gnotes")?
-        .args(vec!["list", "--dir", "custom", "--all"])
-        .env("GNOTES_NOTES_DIR", setup.dir.path())
-        .assert()
+    setup
+        .run(&["list", "--dir", "custom", "--all"], None)?
         .code(1)
         .stderr(predicate::eq("--dir can't be used with --all\n"));
 
