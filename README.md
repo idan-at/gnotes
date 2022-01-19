@@ -38,6 +38,7 @@ NOTE: For all commands, the default directory is `"notes"`.
 - `ssh_file_path`: Path to your private SSH file. Defaults to `$HOME/.ssh/id_rsa`.
 
 NOTE: If `auto_save` is `true`, the `repository` is mandatory.
+
 NOTE: Each of the configuration properties can be overridden by an environment variable with the `GNOTES_` prefix. for example, if `GNOTES_NOTES_DIR` is set, it will override the `notes_dir` that is specified in the configuration file.
 
 ## Backing up your notes
