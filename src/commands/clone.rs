@@ -1,8 +1,9 @@
+use crate::common::git::auth_callbacks;
 use crate::config::Config;
 use crate::run::Run;
 use anyhow::Result;
 use clap::Parser;
-use git2::{build::RepoBuilder, Cred, FetchOptions, RemoteCallbacks, Repository};
+use git2::{build::RepoBuilder, FetchOptions, Repository};
 use log::debug;
 use std::path::Path;
 use std::process;
@@ -12,19 +13,8 @@ pub struct CloneCommand {}
 
 impl CloneCommand {
     fn clone(&self, repository: &str, ssh_file_path: &Path, to: &Path) -> Result<Repository> {
-        let mut callbacks = RemoteCallbacks::new();
-        // TODO: This part is not covered in the clone tests.
-        callbacks.credentials(|_url, username_from_url, _allowed_types| {
-            Cred::ssh_key(
-                username_from_url.expect("Failed to extract username from git repository"),
-                None,
-                ssh_file_path,
-                None,
-            )
-        });
-
         let mut fo = FetchOptions::new();
-        fo.remote_callbacks(callbacks);
+        fo.remote_callbacks(auth_callbacks(ssh_file_path));
 
         let mut builder = RepoBuilder::new();
         builder.fetch_options(fo);

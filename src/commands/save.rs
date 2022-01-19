@@ -31,7 +31,12 @@ impl Run for SaveCommand {
 
         match &config.repository {
             Some(repository) => {
-                commit_and_push(&config.notes_dir, repository, &message)?;
+                commit_and_push(
+                    &config.notes_dir,
+                    &config.ssh_file_path,
+                    repository,
+                    &message,
+                )?;
             }
             _ => {
                 eprintln!("Can't save without a repository. Please specify a repository in the config file.");

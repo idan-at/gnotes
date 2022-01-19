@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use git2::{IndexAddOption, Repository, Signature};
+use git2::{Cred, IndexAddOption, PushOptions, RemoteCallbacks, Repository, Signature};
 use std::path::Path;
 
 const GNOTES_GIT_USER_NAME: &'static str = "gnotes";
@@ -21,7 +21,28 @@ fn open_repository(notes_path: &Path, remote: &str) -> Result<Repository> {
     Ok(repository)
 }
 
-pub fn commit_and_push(notes_path: &Path, remote: &str, message: &str) -> Result<()> {
+pub fn auth_callbacks(ssh_file_path: &Path) -> RemoteCallbacks {
+    let mut callbacks = RemoteCallbacks::new();
+
+    // TODO: This part is not covered in the clone/save tests.
+    callbacks.credentials(|_url, username_from_url, _allowed_types| {
+        Cred::ssh_key(
+            username_from_url.expect("Failed to extract username from git repository"),
+            None,
+            ssh_file_path,
+            None,
+        )
+    });
+
+    callbacks
+}
+
+pub fn commit_and_push(
+    notes_path: &Path,
+    ssh_file_path: &Path,
+    remote: &str,
+    message: &str,
+) -> Result<()> {
     let repository = open_repository(notes_path, remote)?;
 
     let remotes_list = repository.remotes()?;
@@ -62,6 +83,9 @@ pub fn commit_and_push(notes_path: &Path, remote: &str, message: &str) -> Result
             )?;
         }
     };
+
+    let mut push_options = PushOptions::new();
+    push_options.remote_callbacks(auth_callbacks(ssh_file_path));
 
     // TODO: find the ref dynamically?
     remote.push::<&str>(&["refs/heads/main"], None)?;
