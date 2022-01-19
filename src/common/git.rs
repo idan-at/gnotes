@@ -88,7 +88,7 @@ pub fn commit_and_push(
     push_options.remote_callbacks(auth_callbacks(ssh_file_path));
 
     // TODO: find the ref dynamically?
-    remote.push::<&str>(&["refs/heads/main"], None)?;
+    remote.push::<&str>(&["refs/heads/main"], Some(&mut push_options))?;
 
     Ok(())
 }
