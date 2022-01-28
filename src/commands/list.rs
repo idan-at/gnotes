@@ -57,7 +57,7 @@ impl ListCommand {
         }
     }
 
-    fn build_table(&self, entries: Vec<DirEntry>) -> Result<Table> {
+    fn build_table(&self, config: &Config, entries: Vec<DirEntry>) -> Result<Table> {
         let mut table = Table::new("{:<} {:<} {:<} {:<}");
 
         if self.include_headers {
@@ -72,13 +72,15 @@ impl ListCommand {
 
         for entry in entries {
             let metadata = entry.metadata()?;
+            let path = entry.path();
+            let path = path.strip_prefix(&config.notes_dir)?.display();
 
             table.add_row(
                 Row::new()
                     .with_cell(format_system_time(metadata.created()?))
                     .with_cell(metadata.len())
                     .with_cell(format_system_time(metadata.modified()?))
-                    .with_cell(entry.path().display()),
+                    .with_cell(path),
             );
         }
 
@@ -108,7 +110,7 @@ impl Run for ListCommand {
 
         let results = self.list_notes(config)?;
         let total = results.len();
-        let table = self.build_table(results)?;
+        let table = self.build_table(config, results)?;
 
         println!("total {}", total);
         if total > 0 {

@@ -1,16 +1,16 @@
 mod setup;
 
-use crate::setup::DEFAULT_NOTE_FILE_NAME;
+use crate::setup::{DEFAULT_NOTES_DIR_NAME, DEFAULT_NOTE_FILE_NAME};
 use anyhow::{Context, Result};
 use gnotes::common::notes::write_note;
 use predicates::prelude::*;
 use setup::Setup;
 use std::fs;
+use std::path::Path;
 
 #[test]
 fn test_list_notes() -> Result<()> {
     let setup = Setup::new()?;
-    let note_file_path = setup.default_note_path();
 
     write_note(
         &setup.default_note_parent_dir(),
@@ -18,9 +18,12 @@ fn test_list_notes() -> Result<()> {
         "hello",
     )?;
 
+    let expected_note_path = Path::new(DEFAULT_NOTES_DIR_NAME).join(DEFAULT_NOTE_FILE_NAME);
     let expected_line_regex = format!(
         ".+ 6 .+{}",
-        note_file_path.to_str().context("note_file_path.to_str()")?
+        expected_note_path
+            .to_str()
+            .context("expected_note_path.to_str()")?
     );
 
     setup
@@ -35,7 +38,6 @@ fn test_list_notes() -> Result<()> {
 #[test]
 fn test_list_notes_alias() -> Result<()> {
     let setup = Setup::new()?;
-    let note_file_path = setup.default_note_path();
 
     write_note(
         &setup.default_note_parent_dir(),
@@ -43,9 +45,12 @@ fn test_list_notes_alias() -> Result<()> {
         "hello",
     )?;
 
+    let expected_note_path = Path::new(DEFAULT_NOTES_DIR_NAME).join(DEFAULT_NOTE_FILE_NAME);
     let expected_line_regex = format!(
         ".+ 6 .+{}",
-        note_file_path.to_str().context("note_file_path.to_str()")?
+        expected_note_path
+            .to_str()
+            .context("expected_note_path.to_str()")?
     );
 
     setup
@@ -86,7 +91,6 @@ fn test_list_notes_ignore_non_directories() -> Result<()> {
 #[test]
 fn test_list_notes_custom_dir() -> Result<()> {
     let setup = Setup::new()?;
-    let note_file_path = setup.note_path("custom");
 
     write_note(
         &setup.note_parent_dir("custom"),
@@ -94,9 +98,12 @@ fn test_list_notes_custom_dir() -> Result<()> {
         "hello",
     )?;
 
+    let expected_note_path = Path::new("custom").join(DEFAULT_NOTE_FILE_NAME);
     let expected_line_regex = format!(
         ".+ 6 .+{}",
-        note_file_path.to_str().context("note_file_path.to_str()")?
+        expected_note_path
+            .to_str()
+            .context("expected_note_path.to_str()")?
     );
 
     setup
@@ -111,7 +118,6 @@ fn test_list_notes_custom_dir() -> Result<()> {
 #[test]
 fn test_list_notes_include_headers() -> Result<()> {
     let setup = Setup::new()?;
-    let note_file_path = setup.default_note_path();
 
     write_note(
         &setup.default_note_parent_dir(),
@@ -119,10 +125,13 @@ fn test_list_notes_include_headers() -> Result<()> {
         "hello",
     )?;
 
+    let expected_note_path = Path::new(DEFAULT_NOTES_DIR_NAME).join(DEFAULT_NOTE_FILE_NAME);
     let expected_headers_line_regex = "Created\\s+Length\\s+Updated\\s+Path\n";
     let expected_line_regex = format!(
         ".+ 6 .+{}",
-        note_file_path.to_str().context("note_file_path.to_str()")?
+        expected_note_path
+            .to_str()
+            .context("expected_note_path.to_str()")?
     );
 
     setup
@@ -138,8 +147,6 @@ fn test_list_notes_include_headers() -> Result<()> {
 #[test]
 fn test_list_notes_all() -> Result<()> {
     let setup = Setup::new()?;
-    let note1_file_path = setup.default_note_path();
-    let note2_file_path = setup.notes_dir_path().join("reminders").join("doctor");
 
     write_note(
         &setup.default_note_parent_dir(),
@@ -152,17 +159,19 @@ fn test_list_notes_all() -> Result<()> {
         "goodbye",
     )?;
 
+    let expected_note1_path = Path::new(DEFAULT_NOTES_DIR_NAME).join(DEFAULT_NOTE_FILE_NAME);
     let expected_line1_regex = format!(
         ".+ 6 .+{}",
-        note1_file_path
+        expected_note1_path
             .to_str()
-            .context("note1_file_path.to_str()")?
+            .context("expected_note1_path.to_str()")?
     );
+    let expected_note2_path = Path::new("reminders").join("doctor");
     let expected_line2_regex = format!(
         ".+ 8 .+{}",
-        note2_file_path
+        expected_note2_path
             .to_str()
-            .context("note2_file_path.to_str()")?
+            .context("expected_note_path.to_str()")?
     );
 
     setup
