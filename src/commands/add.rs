@@ -8,8 +8,11 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct AddCommand {
+    /// The name of the note
     pub name: String,
+    /// The content to be added to the end of the note
     pub message: String,
+    /// The note directory. defaults to "notes"
     #[clap(long)]
     pub dir: Option<PathBuf>,
 }

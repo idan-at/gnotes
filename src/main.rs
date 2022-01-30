@@ -12,8 +12,10 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 struct Cli {
+    /// Turn of verbose logging
     #[clap(long)]
     debug: bool,
+    // The sub command to run
     #[clap(subcommand)]
     command: Option<Command>,
 }

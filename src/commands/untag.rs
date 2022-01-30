@@ -9,8 +9,11 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct UntagCommand {
+    /// The name of the note
     pub name: String,
+    /// The tag to be removed
     pub tag: String,
+    /// The note directory. defaults to "notes"
     #[clap(long)]
     pub dir: Option<PathBuf>,
 }

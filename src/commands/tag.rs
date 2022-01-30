@@ -10,8 +10,11 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct TagCommand {
+    /// The name of the note
     pub name: String,
+    /// The list of tags
     pub tags: Vec<String>,
+    /// The note directory. defaults to "notes"
     #[clap(long)]
     pub dir: Option<PathBuf>,
 }

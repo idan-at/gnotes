@@ -12,10 +12,13 @@ use std::process;
 #[derive(Debug, Parser)]
 pub struct SearchCommand {
     pub tag: String,
+    /// The note directory. defaults to "notes"
     #[clap(long)]
     pub dir: Option<PathBuf>,
+    /// Display all tags, regardless of the directory
     #[clap(long)]
     pub all: bool,
+    /// Show the tags content, together with their metadata
     #[clap(long)]
     pub show: bool,
 }

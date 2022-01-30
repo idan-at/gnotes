@@ -30,10 +30,13 @@ fn format_system_time(system_time: SystemTime) -> String {
 
 #[derive(Debug, Parser)]
 pub struct ListCommand {
+    /// The note directory. defaults to "notes"
     #[clap(long)]
     pub dir: Option<PathBuf>,
     #[clap(long)]
+    /// Include the table headers
     pub include_headers: bool,
+    /// Display all notes, regardless of the directory
     #[clap(short, long)]
     pub all: bool,
 }

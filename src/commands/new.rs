@@ -9,9 +9,12 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct NewCommand {
+    /// The name of the note
     pub name: String,
+    /// The note directory. defaults to "notes"
     #[clap(long)]
     pub dir: Option<PathBuf>,
+    /// The note content
     #[clap(short, long)]
     pub message: Option<String>,
 }

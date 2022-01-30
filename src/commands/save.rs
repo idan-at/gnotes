@@ -16,6 +16,7 @@ fn now() -> String {
 
 #[derive(Debug, Parser)]
 pub struct SaveCommand {
+    /// The commit message
     #[clap(short, long)]
     message: Option<String>,
 }

@@ -9,7 +9,9 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct EditCommand {
+    /// The name of the note
     pub name: String,
+    /// The note directory. defaults to "notes"
     #[clap(long)]
     pub dir: Option<PathBuf>,
 }
