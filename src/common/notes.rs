@@ -56,22 +56,12 @@ pub fn get_note_identifier(command: &str, notes_dir: &Path, name: &str, dir: &Pa
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::*;
 
-    #[test]
-    fn resolve_dir_default() {
-        let expected = PathBuf::from("notes");
-
-        let dir = None;
-
-        assert_eq!(resolve_dir(&dir), expected);
-    }
-
-    #[test]
-    fn resolve_dir_custom() {
-        let expected = PathBuf::from("something");
-
-        let dir = Some(expected.clone());
-
+    #[rstest]
+    #[case(None, "notes")]
+    #[case(Some(PathBuf::from("something")), "something")]
+    fn resolve_dir_test(#[case] dir: Option<PathBuf>, #[case] expected: PathBuf) {
         assert_eq!(resolve_dir(&dir), expected);
     }
 }
